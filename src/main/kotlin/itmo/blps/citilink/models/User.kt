@@ -8,23 +8,19 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "products")
-data class Product (
+@Table(name = "users")
+data class User (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
     @Column(nullable = false, unique = true)
-    val name: String,
+    val sessionId: String,
 
-    @Column(nullable = false)
-    val price: Double,
+    val name: String? = null,
 
-    val description: String? = null,
+    val email: String? = null,
 
-    @Column(nullable = false)
-    val isProductOfDay: Boolean = false,
-
-    @Column(nullable = false)
-    val stockQuantity: Long
+    @Column(length = 20)
+    val phone: String? = null
 )
