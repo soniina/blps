@@ -1,8 +1,6 @@
 package itmo.blps.citilink.controllers
 
-import itmo.blps.citilink.models.Cart
 import itmo.blps.citilink.models.CartItem
-import itmo.blps.citilink.models.Product
 import itmo.blps.citilink.services.CartService
 import itmo.blps.citilink.services.ProductService
 import itmo.blps.citilink.services.UserService
@@ -12,9 +10,10 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import java.util.UUID
@@ -37,7 +36,7 @@ class CartController(private val cartService: CartService, private val userServi
         } else {
             val items = cartService.getCartItems(user)
             model.addAttribute("cartItems", items)
-            model.addAttribute("cartItemsCount", items.size)
+            model.addAttribute("cartItemsCount", items.sumOf { it.quantity })
             model.addAttribute("totalPrice", items.sumOf { it.product.price * it.quantity })
         }
 
@@ -48,7 +47,7 @@ class CartController(private val cartService: CartService, private val userServi
     @RequestMapping("/add")
     fun addCartItem(
         @CookieValue(value = "session_id", required = false) sessionId: String?,
-        @RequestParam(value = "productId", required = true) productId: Long,
+        @RequestParam(required = true) productId: Long,
         response: HttpServletResponse
     ): String {
         val actualSessionId = sessionId ?: UUID.randomUUID().toString()
@@ -67,5 +66,23 @@ class CartController(private val cartService: CartService, private val userServi
         cartService.addCartItem(product, user)
         return "redirect:/"
     }
+
+    @DeleteMapping
+    @RequestMapping("/remove/{itemId}")
+    fun removeCartItem(@PathVariable itemId: Long): String {
+        cartService.removeCartItem(itemId)
+        return "redirect:/cart"
+    }
+
+    @PutMapping
+    @RequestMapping("/update/{itemId}")
+    fun minusCartItem(
+        @PathVariable itemId: Long,
+        @RequestParam delta: Int
+    ): String {
+        cartService.updateQuantity(itemId, delta)
+        return "redirect:/cart"
+    }
+
 
 }

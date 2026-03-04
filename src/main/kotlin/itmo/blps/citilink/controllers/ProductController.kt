@@ -23,11 +23,10 @@ class ProductController(private val productService: ProductService, private val 
         if (user == null) {
             model.addAttribute("cartItemsCount", 0)
             model.addAttribute("cartProductIds", emptyList<Long>())
-        }
-        else {
-            val cartItemIds = cartService.getCartItems(user).map { it.product.id }
-            model.addAttribute("cartItemsCount", cartItemIds.size)
-            model.addAttribute("cartProductIds", cartItemIds)
+        } else {
+            val cartItems = cartService.getCartItems(user)
+            model.addAttribute("cartItemsCount", cartItems.sumOf { it.quantity })
+            model.addAttribute("cartProductIds", cartItems.map { it.product.id })
         }
 
         model.addAttribute("productsOfDay", productService.getProductsOfDay())
