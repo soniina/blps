@@ -25,5 +25,5 @@ data class CartItem (
     val product: Product,
 
     @Column(nullable = false)
-    var quantity: Int = 0
+    var quantity: Int = 1
 )

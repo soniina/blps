@@ -89,22 +89,27 @@
                     <div class="flex items-baseline space-x-2 mb-3">
                         <span th:text="${#numbers.formatDecimal(product.price, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽'" class="text-2xl font-black text-gray-900">0 ₽</span>
                     </div>
-                    <form th:action="@{/cart/add}" method="post">
+                    <form th:if="${!#lists.contains(cartProductIds, product.id)}"
+                          th:action="@{/cart/add}" method="post"
+                          class="m-0 p-0">
+
                         <input type="hidden" name="productId" th:value="${product.id}">
-                        <div class="flex items-center mb-3 space-x-2">
-                            <label class="text-[10px] text-gray-400 uppercase font-bold">Кол-во:</label>
-                            <input type="number" name="quantity" value="1" min="1" class="w-16 border-2 border-gray-100 rounded px-2 py-1 text-sm text-center focus:outline-none focus:border-orange-500 transition">
-                        </div>
-                        <button type="submit" class="w-full citilink-orange text-white font-bold py-3 rounded-lg citilink-orange-hover transition flex items-center justify-center space-x-3 shadow-lg shadow-orange-200">
+
+                        <button type="submit"
+                                class="w-full py-3 px-4 border-2 border-transparent citilink-orange text-white font-bold rounded-lg citilink-orange-hover transition flex items-center justify-center space-x-3 shadow-lg shadow-orange-200 box-border">
                             <i class="fa-solid fa-cart-shopping"></i>
                             <span>В корзину</span>
                         </button>
                     </form>
+
+                    <div th:if="${#lists.contains(cartProductIds, product.id)}">
+                        <a th:href="@{/cart}"
+                           class="w-full py-3 px-4 border-2 border-gray-200 text-gray-400 font-bold rounded-lg hover:border-orange-500 hover:text-orange-500 transition flex items-center justify-center space-x-3 bg-white box-border">
+                            <i class="fa-solid fa-check"></i>
+                            <span>В корзине</span>
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                <span class="text-[10px] text-gray-400 uppercase font-bold">Осталось:</span>
-                <span th:text="${product.stockQuantity} + ' шт.'" class="text-sm font-bold text-green-600">0 шт.</span>
             </div>
         </div>
         <div th:if="${#lists.isEmpty(productsOfDay)}" class="col-span-full py-20 text-center">
