@@ -32,12 +32,12 @@ class CartController(private val cartService: CartService, private val userServi
         if (user == null) {
             model.addAttribute("cartItems", emptyList<CartItem>())
             model.addAttribute("cartItemsCount", 0)
-            model.addAttribute("totalPrice", 0.0)
+            model.addAttribute("itemsPrice", 0.0)
         } else {
             val items = cartService.getCartItems(user)
             model.addAttribute("cartItems", items)
             model.addAttribute("cartItemsCount", items.sumOf { it.quantity })
-            model.addAttribute("totalPrice", items.sumOf { it.product.price * it.quantity })
+            model.addAttribute("itemsPrice", items.sumOf { it.product.price * it.quantity })
         }
 
         return "cart"

@@ -37,4 +37,10 @@ class CartService(private val cartRepository: CartRepository, private val cartIt
         }
     }
 
+    @Transactional
+    fun clearCart(user: User) {
+        val cart = cartRepository.findCartByUser(user) ?: return
+        cartItemRepository.deleteAllByCart(cart)
+    }
+
 }

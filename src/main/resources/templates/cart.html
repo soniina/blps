@@ -25,7 +25,6 @@
 </head>
 <body class="bg-gray-100 font-sans flex flex-col min-h-screen">
 
-<!-- Навигация (Header) - Абсолютно идентичен главной -->
 <header class="bg-white shadow-md sticky top-0 z-50">
     <div class="container mx-auto px-4 py-3 flex items-center justify-between">
         <a th:href="@{/}" class="flex items-center space-x-2 hover:opacity-90 transition">
@@ -56,12 +55,10 @@
 </header>
 
 <main class="container mx-auto px-4 py-8 flex-grow">
-    <!-- Заголовок в том же месте, что и на главной (через идентичный flex-контейнер) -->
-    <div class="flex items-center space-x-6 mb-10">
-        <h1 class="text-4xl font-bold text-gray-800 tracking-tight">Корзина</h1>
+    <div class="flex items-center mb-10 h-14">
+        <h1 class="text-4xl font-bold text-gray-800 tracking-tight leading-none">Корзина</h1>
     </div>
 
-    <!-- Если корзина пуста -->
     <div th:if="${#lists.isEmpty(cartItems)}" class="bg-white rounded-2xl p-12 text-center shadow-sm">
         <div class="mb-6">
             <i class="fa-solid fa-cart-plus text-gray-200 text-8xl"></i>
@@ -73,7 +70,6 @@
         </a>
     </div>
 
-    <!-- Основная сетка корзины -->
     <div th:if="${not #lists.isEmpty(cartItems)}" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div class="lg:col-span-8 space-y-4">
             <div th:each="item : ${cartItems}" class="bg-white rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row items-center gap-6 border border-transparent hover:border-gray-200 transition">
@@ -90,7 +86,6 @@
                     </form>
                 </div>
                 <div class="flex items-center space-x-3 bg-gray-50 p-2 rounded-xl">
-
                     <form th:action="@{/cart/update/{id}(id=${item.id})}" th:method="put" class="inline">
                         <input type="hidden" name="delta" value="-1">
                         <button type="submit"
@@ -99,9 +94,7 @@
                             <i class="fa-solid fa-minus text-xs"></i>
                         </button>
                     </form>
-
                     <span th:text="${item.quantity}" class="w-8 text-center font-bold text-lg">1</span>
-
                     <form th:action="@{/cart/update/{id}(id=${item.id})}" th:method="put" class="inline">
                         <input type="hidden" name="delta" value="1">
                         <button type="submit"
@@ -111,15 +104,9 @@
                         </button>
                     </form>
                 </div>
-
-                <p th:if="${item.quantity >= item.product.stockQuantity}"
-                   class="text-[10px] text-orange-500 font-bold mt-1 uppercase text-center">
-                    Максимум
-                </p>
                 <div class="text-right min-w-[120px]">
                     <p th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽'"
                        class="text-2xl font-black text-gray-900 whitespace-nowrap">0 ₽</p>
-
                     <p th:if="${item.quantity > 1}"
                        th:text="${#numbers.formatDecimal(item.product.price, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽ / шт.'"
                        class="text-xs text-gray-400 font-medium whitespace-nowrap"></p>
@@ -133,7 +120,7 @@
                 <div class="space-y-4 mb-8">
                     <div class="flex justify-between text-gray-500">
                         <span>Товары (<span th:text="${cartItemsCount}">0</span>)</span>
-                        <span th:text="${#numbers.formatDecimal(totalPrice, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽'">0 ₽</span>
+                        <span th:text="${#numbers.formatDecimal(itemsPrice, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽'">0 ₽</span>
                     </div>
                     <div class="flex justify-between text-gray-500">
                         <span>Скидка</span>
@@ -143,11 +130,11 @@
                     <div class="flex justify-between items-end">
                         <span class="text-lg font-bold">Итого</span>
                         <div class="text-right">
-                            <p th:text="${#numbers.formatDecimal(totalPrice, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽'" class="text-4xl font-black citilink-orange-text leading-none mb-1">0 ₽</p>
+                            <p th:text="${#numbers.formatDecimal(itemsPrice, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽'" class="text-4xl font-black citilink-orange-text leading-none mb-1">0 ₽</p>
                         </div>
                     </div>
                 </div>
-                <form th:action="@{/checkout/recipient}" method="get">
+                <form th:action="@{/checkout}" method="get">
                     <button type="submit" class="w-full citilink-orange text-white py-5 rounded-2xl font-bold text-xl citilink-orange-hover transition shadow-lg shadow-orange-100 flex items-center justify-center group">
                         <span>Оформить заказ</span>
                         <i class="fa-solid fa-arrow-right ml-3 group-hover:translate-x-1 transition-transform"></i>
@@ -161,7 +148,7 @@
     </div>
 </main>
 
-<footer class="bg-gray-800 text-gray-400 py-10">
+<footer class="bg-gray-800 text-gray-400 py-10 mt-auto">
     <div class="container mx-auto px-4 text-center">
         <p class="text-sm uppercase tracking-widest mb-2 font-bold">Citilink Project</p>
         <p class="text-xs">&copy; 2026</p>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформление заказа — Ситилинк</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .citilink-orange { background-color: #ff4e00; }
+        .citilink-orange-text { color: #ff4e00; }
+        .citilink-orange-hover:hover { background-color: #e64600; }
+
+        .method-card {
+            border: 2px solid #e5e7eb;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .method-radio:checked + .method-card {
+            border-color: #ff4e00;
+            background-color: #fffaf0;
+        }
+        .method-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f9fafb;
+        }
+        .error-text { color: #ef4444; font-size: 0.75rem; font-weight: bold; margin-top: 0.25rem; }
+        .input-error { border-color: #ef4444 !important; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans flex flex-col min-h-screen">
+
+<header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <a th:href="@{/}" class="flex items-center space-x-2 hover:opacity-90 transition">
+            <div class="citilink-orange text-white p-2 rounded-lg font-bold text-xl tracking-tight">CITILINK</div>
+        </a>
+        <div class="hidden md:flex flex-grow mx-8">
+            <input type="text" placeholder="Поиск товаров..." class="w-full border-2 border-gray-100 rounded-l-lg px-4 py-2 focus:outline-none focus:border-orange-500">
+            <button class="citilink-orange text-white px-6 rounded-r-lg citilink-orange-hover"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+        <a th:href="@{/cart}" class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition relative">
+            <div class="relative">
+                <i class="fa-solid fa-cart-shopping text-2xl"></i>
+                <span th:text="${cartItemsCount ?: 0}" class="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">0</span>
+            </div>
+            <span class="hidden sm:inline font-medium">Корзина</span>
+        </a>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 py-8 flex-grow">
+    <div class="flex items-center mb-10 h-14">
+        <h1 class="text-4xl font-bold text-gray-800 tracking-tight leading-none">Оформление заказа</h1>
+    </div>
+
+    <form th:action="@{/checkout}" th:object="${orderRequest}" method="post" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <div class="lg:col-span-8 space-y-8">
+            <!-- 1. Получатель -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="citilink-orange text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">1</div>
+                    <h2 class="text-2xl font-bold text-gray-800">Данные получателя</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Имя</label>
+                        <input type="text" th:field="*{name}" placeholder="Иван"
+                               th:classappend="${#fields.hasErrors('name')} ? 'input-error'"
+                               class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 transition">
+                        <p class="error-text" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Фамилия</label>
+                        <input type="text" th:field="*{surname}" placeholder="Иванов"
+                               th:classappend="${#fields.hasErrors('surname')} ? 'input-error'"
+                               class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 transition">
+                        <p class="error-text" th:if="${#fields.hasErrors('surname')}" th:errors="*{surname}"></p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Телефон</label>
+                        <input type="tel" th:field="*{phone}" placeholder="+79991234567"
+                               th:classappend="${#fields.hasErrors('phone')} ? 'input-error'"
+                               class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 transition">
+                        <p class="error-text" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Способ получения -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="citilink-orange text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</div>
+                    <h2 class="text-2xl font-bold text-gray-800">Способ получения</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <label class="relative">
+                        <input type="radio" th:field="*{receiptMethod}" value="PICKUP" class="hidden method-radio" id="pickup-radio" onchange="toggleAddress(false)">
+                        <div class="method-card p-6 rounded-2xl h-full flex flex-col justify-between">
+                            <div>
+                                <i class="fa-solid fa-store citilink-orange-text text-2xl mb-3"></i>
+                                <p class="font-bold text-lg">Самовывоз</p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="relative">
+                        <input type="radio" th:field="*{receiptMethod}" value="DELIVERY" class="hidden method-radio" id="delivery-radio" onchange="toggleAddress(true)">
+                        <div class="method-card p-6 rounded-2xl h-full flex flex-col justify-between">
+                            <div>
+                                <i class="fa-solid fa-truck citilink-orange-text text-2xl mb-3"></i>
+                                <p class="font-bold text-lg">Доставка курьером</p>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <div id="address-section" th:class="${orderRequest.receiptMethod.name() == 'DELIVERY' ? '' : 'hidden'}">
+                    <label class="block text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Адрес доставки</label>
+                    <input type="text" th:field="*{deliveryAddress}" placeholder="г. Москва, ул. Примерная, д. 1, кв. 1"
+                           th:classappend="${#fields.hasErrors('deliveryAddress')} ? 'input-error'"
+                           class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 transition">
+                    <p class="error-text" th:if="${#fields.hasErrors('deliveryAddress')}" th:errors="*{deliveryAddress}"></p>
+                </div>
+            </div>
+
+            <!-- 3. Способ оплаты -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="citilink-orange text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">3</div>
+                    <h2 class="text-2xl font-bold text-gray-800">Способ оплаты</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="method-card disabled p-5 rounded-2xl flex items-center space-x-4">
+                        <i class="fa-solid fa-qrcode text-gray-300 text-xl"></i>
+                        <p class="font-bold text-gray-400">СБП - QR Code</p>
+                    </div>
+                    <div class="method-card disabled p-5 rounded-2xl flex items-center space-x-4">
+                        <i class="fa-solid fa-wallet text-gray-300 text-xl"></i>
+                        <p class="font-bold text-gray-400">При получении</p>
+                    </div>
+                    <div class="method-card disabled p-5 rounded-2xl flex items-center space-x-4">
+                        <i class="fa-solid fa-credit-card text-gray-300 text-xl"></i>
+                        <p class="font-bold text-gray-400">Картой онлайн</p>
+                    </div>
+
+                    <label class="relative">
+                        <input type="radio" th:field="*{paymentMethod}" value="CREDIT" class="hidden method-radio">
+                        <div class="method-card p-5 rounded-2xl flex items-center space-x-4 shadow-sm border-orange-200">
+                            <i class="fa-solid fa-hand-holding-dollar citilink-orange-text text-xl"></i>
+                            <p class="font-bold text-gray-800">В кредит</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА (ИТОГО) -->
+        <div class="lg:col-span-4">
+            <div id="summary-data"
+                 th:attr="data-items-price=${itemsPrice ?: 0}, data-delivery-fee=${deliveryFee ?: 0}"
+                 class="bg-white rounded-2xl p-8 shadow-xl border-2 border-orange-50 sticky top-24">
+
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Детали заказа</h2>
+
+                <div class="space-y-4 mb-8">
+                    <div class="flex justify-between text-gray-500">
+                        <span>Товары (<span th:text="${cartItemsCount ?: 0}">0</span>)</span>
+                        <span th:text="${#numbers.formatDecimal(itemsPrice ?: 0, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽'">0 ₽</span>
+                    </div>
+
+                    <div class="flex justify-between text-gray-500">
+                        <span id="delivery-label">Самовывоз</span>
+                        <span id="delivery-value" class="font-bold text-green-600">Бесплатно</span>
+                    </div>
+
+                    <div class="h-px bg-gray-100 my-4"></div>
+
+                    <div class="flex justify-between items-end">
+                        <span class="text-lg font-bold">Итого</span>
+                        <div class="text-right">
+                            <p id="total-price-display"
+                               th:text="${#numbers.formatDecimal(itemsPrice ?: 0, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽'"
+                               class="text-4xl font-black citilink-orange-text leading-none mb-1">0 ₽</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full citilink-orange text-white py-5 rounded-2xl font-bold text-xl citilink-orange-hover transition shadow-lg shadow-orange-100 flex items-center justify-center group">
+                    <span>Заполнить заявку на кредит</span>
+                    <i class="fa-solid fa-arrow-right ml-3 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+
+                <div class="mt-6 flex items-center justify-center space-x-2 text-gray-400">
+                    <i class="fa-solid fa-shield-halved text-sm"></i>
+                </div>
+            </div>
+        </div>
+    </form>
+</main>
+
+<footer class="bg-gray-800 text-gray-400 py-10 mt-auto">
+    <div class="container mx-auto px-4 text-center">
+        <p class="text-sm uppercase tracking-widest mb-2 font-bold text-gray-500">Citilink Project</p>
+        <p class="text-xs">&copy; 2026</p>
+    </div>
+</footer>
+
+<script>
+    function toggleAddress(isDelivery) {
+        const summaryData = document.getElementById('summary-data');
+        const itemsPrice = parseFloat(summaryData.dataset.itemsPrice);
+        const deliveryFee = parseFloat(summaryData.dataset.deliveryFee);
+
+        const deliveryLabel = document.getElementById('delivery-label');
+        const deliveryValue = document.getElementById('delivery-value');
+        const totalDisplay = document.getElementById('total-price-display');
+        const addressSection = document.getElementById('address-section');
+
+        if (isDelivery) {
+            addressSection.classList.remove('hidden');
+            const finalPrice = itemsPrice + deliveryFee;
+
+            deliveryLabel.innerText = 'Доставка';
+            deliveryValue.innerText = deliveryFee > 0 ? deliveryFee.toLocaleString('ru-RU') + ' ₽' : 'Бесплатно';
+            deliveryValue.className = deliveryFee > 0 ? 'font-bold text-gray-800' : 'font-bold text-green-600';
+
+            totalDisplay.innerText = finalPrice.toLocaleString('ru-RU') + ' ₽';
+        } else {
+            addressSection.classList.add('hidden');
+
+            deliveryLabel.innerText = 'Самовывоз';
+            deliveryValue.innerText = 'Бесплатно';
+            deliveryValue.className = 'font-bold text-green-600';
+
+            totalDisplay.innerText = itemsPrice.toLocaleString('ru-RU') + ' ₽';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const isDeliverySelected = document.getElementById('delivery-radio').checked;
+        toggleAddress(isDeliverySelected);
+    });
+</script>
+</body>
+</html>
