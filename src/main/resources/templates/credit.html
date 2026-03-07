@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анкета на кредит — Ситилинк</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .citilink-orange { background-color: #ff4e00; }
+        .citilink-orange-text { color: #ff4e00; }
+        .citilink-orange-hover:hover { background-color: #e64600; }
+        .error-text { color: #ef4444; font-size: 0.75rem; font-weight: bold; margin-top: 0.25rem; }
+        .input-error { border-color: #ef4444 !important; }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans flex flex-col min-h-screen">
+
+<header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <a th:href="@{/}" class="flex items-center space-x-2 hover:opacity-90 transition">
+            <div class="citilink-orange text-white p-2 rounded-lg font-bold text-xl tracking-tight">CITILINK</div>
+        </a>
+        <div class="hidden md:flex flex-grow mx-8">
+            <input type="text" placeholder="Поиск товаров..." class="w-full border-2 border-gray-100 rounded-l-lg px-4 py-2 focus:outline-none focus:border-orange-500">
+            <button class="citilink-orange text-white px-6 rounded-r-lg citilink-orange-hover"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+        <a th:href="@{/cart}" class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition relative">
+            <div class="relative">
+                <i class="fa-solid fa-cart-shopping text-2xl"></i>
+                <span th:text="${cartItemsCount ?: 0}" class="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">0</span>
+            </div>
+            <span class="hidden sm:inline font-medium">Корзина</span>
+        </a>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 py-8 flex-grow">
+    <div class="flex items-center mb-10 h-14">
+        <h1 class="text-4xl font-bold text-gray-800 tracking-tight leading-none">Анкета на кредит</h1>
+    </div>
+
+    <form th:action="@{/credit/{id}(id=${order.id})}" th:object="${creditRequest}" method="post" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <input type="hidden" th:field="*{orderId}">
+
+        <div class="lg:col-span-8 space-y-8">
+            <!-- 1. Параметры кредита -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="citilink-orange text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">1</div>
+                    <h2 class="text-2xl font-bold text-gray-800">Параметры кредита</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Срок кредита (мес.)</label>
+                        <input type="number" th:field="*{termMonths}" min="6" max="36" step="1"
+                               th:classappend="${#fields.hasErrors('termMonths')} ? 'input-error'"
+                               class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 transition font-bold">
+                        <p class="error-text" th:if="${#fields.hasErrors('termMonths')}" th:errors="*{termMonths}"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Первый взнос (₽)</label>
+                        <input type="number" th:field="*{initialPayment}" min="0" th:max="${order.totalAmount * 0.9}" step="1000"
+                               th:classappend="${#fields.hasErrors('initialPayment')} ? 'input-error'"
+                               class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 transition font-bold">
+                        <p class="text-[10px] text-gray-400 mt-1 italic">Макс. взнос: <span th:text="${#numbers.formatDecimal(order.totalAmount * 0.9, 0, 'POINT', 0, 'POINT')}"></span> ₽</p>
+                        <p class="error-text" th:if="${#fields.hasErrors('initialPayment')}" th:errors="*{initialPayment}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Паспортные данные -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="citilink-orange text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</div>
+                    <h2 class="text-2xl font-bold text-gray-800">Паспортные данные</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Серия</label>
+                        <input type="text" th:field="*{passportSeries}" maxlength="4" placeholder="0000"
+                               th:classappend="${#fields.hasErrors('passportSeries')} ? 'input-error'"
+                               class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 transition text-center tracking-widest font-bold">
+                        <p class="error-text" th:if="${#fields.hasErrors('passportSeries')}" th:errors="*{passportSeries}"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Номер</label>
+                        <input type="text" th:field="*{passportNumber}" maxlength="6" placeholder="000000"
+                               th:classappend="${#fields.hasErrors('passportNumber')} ? 'input-error'"
+                               class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 transition text-center tracking-widest font-bold">
+                        <p class="error-text" th:if="${#fields.hasErrors('passportNumber')}" th:errors="*{passportNumber}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Контакты -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="citilink-orange text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">3</div>
+                    <h2 class="text-2xl font-bold text-gray-800">Контактные данные</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Email</label>
+                        <input type="email" th:field="*{email}" placeholder="example@mail.ru"
+                               th:classappend="${#fields.hasErrors('email')} ? 'input-error'"
+                               class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 transition">
+                        <p class="error-text" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Телефон</label>
+                        <input type="tel" th:field="*{phone}" placeholder="+79991234567"
+                               th:classappend="${#fields.hasErrors('phone')} ? 'input-error'"
+                               class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 transition font-bold">
+                        <p class="error-text" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА -->
+        <div class="lg:col-span-4">
+            <div class="bg-white rounded-2xl p-8 shadow-xl border-2 border-orange-50 sticky top-24">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Детали заказа</h2>
+                <div class="space-y-4 mb-8">
+                    <div class="flex justify-between text-gray-500">
+                        <span>Заказ №</span>
+                        <span class="font-bold text-gray-800" th:text="${order.id}">0</span>
+                    </div>
+                    <div class="flex justify-between text-gray-500">
+                        <span>Товары</span>
+                        <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽'">0 ₽</span>
+                    </div>
+                    <div class="h-px bg-gray-100 my-4"></div>
+                    <div class="flex justify-between items-end">
+                        <span class="text-lg font-bold">Итого</span>
+                        <div class="text-right">
+                            <p th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽'"
+                               class="text-4xl font-black citilink-orange-text leading-none mb-1">0 ₽</p>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="w-full citilink-orange text-white py-5 rounded-2xl font-bold text-xl citilink-orange-hover transition shadow-lg shadow-orange-100 flex items-center justify-center group">
+                    <span>Отправить заявку</span>
+                    <i class="fa-solid fa-paper-plane ml-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</main>
+
+<footer class="bg-gray-800 text-gray-400 py-10 mt-auto">
+    <div class="container mx-auto px-4 text-center">
+        <p class="text-sm uppercase tracking-widest mb-2 font-bold text-gray-500">Citilink Project</p>
+        <p class="text-xs">&copy; 2026</p>
+    </div>
+</footer>
+
+</body>
+</html>

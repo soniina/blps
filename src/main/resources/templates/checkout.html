@@ -122,9 +122,9 @@
                 <div id="address-section" th:class="${orderRequest.receiptMethod.name() == 'DELIVERY' ? '' : 'hidden'}">
                     <label class="block text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Адрес доставки</label>
                     <input type="text" th:field="*{deliveryAddress}" placeholder="г. Москва, ул. Примерная, д. 1, кв. 1"
-                           th:classappend="${#fields.hasErrors('deliveryAddress')} ? 'input-error'"
+                           th:classappend="${#fields.hasErrors('deliveryAddressValid')} ? 'input-error'"
                            class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 transition">
-                    <p class="error-text" th:if="${#fields.hasErrors('deliveryAddress')}" th:errors="*{deliveryAddress}"></p>
+                    <p class="error-text" th:if="${#fields.hasErrors('deliveryAddressValid')}" th:errors="*{deliveryAddressValid}"></p>
                 </div>
             </div>
 

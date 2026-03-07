@@ -64,10 +64,13 @@ data class Order (
     val paymentMethod: PaymentMethod,
 
     @Column(nullable = false)
-    val totalAmount: Double,
+    val itemsPrice: Double,
 
     @Column(nullable = false)
     val deliveryPrice: Double,
+
+    @Column(nullable = false)
+    val totalAmount: Double,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

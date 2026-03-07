@@ -14,7 +14,7 @@ class CartService(private val cartRepository: CartRepository, private val cartIt
 
     fun getCartItems(user: User): List<CartItem> {
         val cart = cartRepository.findCartByUser(user) ?: return emptyList()
-        return cartItemRepository.findAllByCart(cart)
+        return cartItemRepository.findAllByCartOrderByIdAsc(cart)
     }
 
     @Transactional

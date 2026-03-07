@@ -23,9 +23,10 @@ data class OrderRequest (
 
     val paymentMethod: PaymentMethod = PaymentMethod.CREDIT,
 ) {
-    @AssertTrue(message = "При выборе доставки необходимо указать адрес")
-    fun isDeliveryAddressValid(): Boolean {
-        if (receiptMethod == ReceiptMethod.DELIVERY) return !deliveryAddress.isNullOrBlank()
-        return true
-    }
+    @get:AssertTrue(message = "При выборе доставки необходимо указать адрес")
+    val deliveryAddressValid: Boolean
+        get() {
+            if (receiptMethod == ReceiptMethod.DELIVERY) return !deliveryAddress.isNullOrBlank()
+            return true
+        }
 }

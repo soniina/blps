@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 class CheckoutController(private val userService: UserService, private val cartService: CartService, private val orderService: OrderService) {
 
     @GetMapping
-    fun checkoutPage(
+    fun showCheckoutPage(
         @CookieValue(value = "session_id", required = true) sessionId: String,
         model: Model): String {
         val user = userService.getUser(sessionId) ?: return "redirect:/"
