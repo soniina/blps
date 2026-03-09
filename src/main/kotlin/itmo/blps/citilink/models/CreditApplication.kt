@@ -13,8 +13,10 @@ import jakarta.persistence.Table
 
 enum class ApplicationStatus {
     SENT,
-    APPROVED,
-    REJECTED
+    REJECTED,
+    WAITING_FOR_OPERATOR,
+    SIGNED,
+    CANCELLED
 }
 
 @Entity

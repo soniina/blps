@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface CreditOfferRepository : JpaRepository<CreditOffer, Long> {
+    fun findCreditOfferById(offerId: Long): CreditOffer?
     fun findAllByApplicationOrderByIsOnlineSigningAvailableDesc(application: CreditApplication): List<CreditOffer>
 }

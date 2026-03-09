@@ -18,16 +18,26 @@
 <header class="bg-white shadow-md sticky top-0 z-50">
     <div class="container mx-auto px-4 py-3 flex items-center justify-between">
         <a th:href="@{/}" class="flex items-center space-x-2 hover:opacity-90 transition">
-            <div class="citilink-orange text-white p-2 rounded-lg font-bold text-xl tracking-tight">CITILINK</div>
+            <div class="citilink-orange text-white p-2 rounded-lg font-bold text-xl tracking-tight">
+                CITILINK
+            </div>
         </a>
+
         <div class="hidden md:flex flex-grow mx-8">
-            <input type="text" placeholder="Поиск товаров..." class="w-full border-2 border-gray-100 rounded-l-lg px-4 py-2 focus:outline-none focus:border-orange-500">
-            <button class="citilink-orange text-white px-6 rounded-r-lg citilink-orange-hover"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <input type="text" placeholder="Поиск товаров..."
+                   class="w-full border-2 border-gray-200 rounded-l-lg px-4 py-2 focus:outline-none focus:border-orange-500">
+            <button class="citilink-orange text-white px-6 rounded-r-lg citilink-orange-hover transition">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
         </div>
+
         <a th:href="@{/cart}" class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition relative">
             <div class="relative">
                 <i class="fa-solid fa-cart-shopping text-2xl"></i>
-                <span th:text="${cartItemsCount ?: 0}" class="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">0</span>
+                <span th:text="${cartItemsCount}"
+                      class="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
+                        0
+                    </span>
             </div>
             <span class="hidden sm:inline font-medium">Корзина</span>
         </a>
@@ -94,9 +104,9 @@
                         <span>Заказ №</span>
                         <span class="font-bold text-gray-800" th:text="${order.id}">0</span>
                     </div>
-                    <div class="flex justify-between text-gray-800">
+                    <div class="flex justify-between text-gray-500">
                         <span>Сумма к оформлению</span>
-                        <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽'">0 ₽</span>
+                        <span class="font-bold text-gray-800" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'WHITESPACE', 0, 'POINT')} + ' ₽'">0 ₽</span>
                     </div>
                 </div>
 

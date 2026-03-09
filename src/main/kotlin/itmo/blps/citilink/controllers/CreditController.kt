@@ -1,6 +1,7 @@
 package itmo.blps.citilink.controllers
 
 import itmo.blps.citilink.dto.CreditApplicationRequest
+import itmo.blps.citilink.models.ApplicationStatus
 import itmo.blps.citilink.services.CreditOfferService
 import itmo.blps.citilink.services.CreditService
 import itmo.blps.citilink.services.OrderService
@@ -60,6 +61,53 @@ class CreditController(private val creditService: CreditService, private val ord
         model.addAttribute("offers", offers)
 
         return "credit/offers"
+    }
+
+    @PostMapping("/select/{offerId}")
+    fun selectOffer(
+        @PathVariable offerId: Long,
+        model: Model): String {
+
+        val offer = creditOfferService.getCreditOfferById(offerId) ?: return "redirect:/"
+        val application = offer.application
+
+        creditService.selectOffer(application, offer)
+
+        return if (offer.isOnlineSigningAvailable) {
+            "redirect:/credit/sign-online/${application.id}"
+        } else {
+            creditService.updateStatus(application, ApplicationStatus.WAITING_FOR_OPERATOR)
+            "redirect:/credit/wait-call/${application.id}"
+        }
+    }
+
+    @GetMapping("/sign-online/{applicationId}")
+    fun showSignOnline(
+        @PathVariable applicationId: Long,
+        model: Model): String {
+        val application = creditService.getCreditApplicationById(applicationId) ?: return "redirect:/"
+
+        model.addAttribute("creditApplication", application)
+        model.addAttribute("order", application.order)
+        return "credit/sign-online"
+    }
+
+    @PostMapping("/confirm-sign/{applicationId}")
+    fun confirmSign(@PathVariable applicationId: Long): String {
+        val application = creditService.getCreditApplicationById(applicationId) ?: return "redirect:/"
+
+        creditService.signApplication(application)
+
+        return "redirect:/checkout/success/${application.order.id}"
+    }
+
+    @GetMapping("/wait-call/{applicationId}")
+    fun showWaitCall(@PathVariable applicationId: Long, model: Model): String {
+        val application = creditService.getCreditApplicationById(applicationId) ?: return "redirect:/"
+
+        model.addAttribute("creditApplication", application)
+
+        return "credit/wait-call"
     }
 
 }

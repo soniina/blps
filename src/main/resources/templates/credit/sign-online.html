@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подписание договора — Ситилинк</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .citilink-orange { background-color: #ff4e00; }
+        .citilink-orange-text { color: #ff4e00; }
+        .citilink-orange-hover:hover { background-color: #e64600; }
+        .sms-input {
+            letter-spacing: 1em;
+            text-align: center;
+            padding-left: 1em;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans flex flex-col min-h-screen">
+
+<header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <a th:href="@{/}" class="flex items-center space-x-2 hover:opacity-90 transition">
+            <div class="citilink-orange text-white p-2 rounded-lg font-bold text-xl tracking-tight">
+                CITILINK
+            </div>
+        </a>
+
+        <div class="hidden md:flex flex-grow mx-8">
+            <input type="text" placeholder="Поиск товаров..."
+                   class="w-full border-2 border-gray-200 rounded-l-lg px-4 py-2 focus:outline-none focus:border-orange-500">
+            <button class="citilink-orange text-white px-6 rounded-r-lg citilink-orange-hover transition">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </div>
+
+        <a th:href="@{/cart}" class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition relative">
+            <div class="relative">
+                <i class="fa-solid fa-cart-shopping text-2xl"></i>
+                <span th:text="${cartItemsCount}"
+                      class="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
+                        0
+                    </span>
+            </div>
+            <span class="hidden sm:inline font-medium">Корзина</span>
+        </a>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 py-8 flex-grow">
+    <div class="flex items-center mb-10 h-14">
+        <h1 class="text-4xl font-bold text-gray-800 tracking-tight leading-none">Подписание договора</h1>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- ЛЕВАЯ КОЛОНКА -->
+        <div class="lg:col-span-8">
+            <div class="bg-white rounded-2xl p-10 shadow-sm text-center">
+                <div class="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center text-orange-500 text-3xl mx-auto mb-6">
+                    <i class="fa-solid fa-comment-sms"></i>
+                </div>
+
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Подтверждение по SMS</h2>
+                <p class="text-gray-500 mb-8 max-w-md mx-auto">
+                    Мы отправили код подтверждения на номер <span class="font-bold text-gray-800" th:text="${creditApplication.phone}">+7 (999) ***-**-**</span>.
+                    Введите его ниже для подписания кредитного договора.
+                </p>
+
+                <form th:action="@{/credit/confirm-sign/{id}(id=${creditApplication?.id})}" method="post" class="max-w-xs mx-auto">
+                    <input type="text" name="smsCode" maxlength="4" required
+                           class="sms-input w-full border-2 border-gray-100 rounded-2xl py-4 text-3xl font-black focus:border-orange-500 focus:outline-none transition mb-6"
+                           placeholder="0000">
+
+                    <button type="submit" class="w-full citilink-orange text-white py-4 rounded-xl font-bold text-lg citilink-orange-hover transition shadow-lg shadow-orange-100">
+                        Подписать договор
+                    </button>
+                </form>
+
+                <p class="mt-8 text-sm text-gray-400">
+                    Не пришел код? <a href="#" class="text-orange-500 font-bold hover:underline">Отправить повторно</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА (БОКОВУШКА) -->
+        <div class="lg:col-span-4">
+            <div class="bg-white rounded-2xl p-8 shadow-xl border-2 border-orange-50 sticky top-24">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Ваш заказ</h2>
+                <div class="space-y-4 mb-8">
+                    <div class="flex justify-between text-gray-500">
+                        <span>Заказ №</span>
+                        <span class="font-bold text-gray-800" th:text="${creditApplication.order.id}">0</span>
+                    </div>
+                    <div class="flex justify-between text-gray-500">
+                        <span>Банк</span>
+                        <span class="font-bold text-gray-800">Банк-партнер</span>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-50">
+                    <p class="text-[11px] text-gray-400 leading-relaxed">
+                        Введите код из SMS для подтверждения. После этого начнется
+                        <span class="font-bold text-gray-500">процесс отгрузки</span> вашего заказа.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-gray-800 text-gray-400 py-10 mt-auto">
+    <div class="container mx-auto px-4 text-center">
+        <p class="text-sm uppercase tracking-widest mb-2 font-bold text-gray-500">Citilink Project</p>
+        <p class="text-xs">&copy; 2026</p>
+    </div>
+</footer>
+
+</body>
+</html>
