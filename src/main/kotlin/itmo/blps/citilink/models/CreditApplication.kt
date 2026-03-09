@@ -46,6 +46,10 @@ open class CreditApplication (
     @Column(nullable = false)
     var phone: String,
 
+    @OneToOne
+    @JoinColumn(name = "selected_offer_id")
+    var selectedOffer: CreditOffer? = null,
+
     @Enumerated(EnumType.STRING)
     var status: ApplicationStatus = ApplicationStatus.SENT
 )

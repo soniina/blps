@@ -58,7 +58,6 @@
     <form th:action="@{/checkout}" th:object="${orderRequest}" method="post" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
         <div class="lg:col-span-8 space-y-8">
-            <!-- 1. Получатель -->
             <div class="bg-white rounded-2xl p-8 shadow-sm">
                 <div class="flex items-center space-x-4 mb-6">
                     <div class="citilink-orange text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">1</div>
@@ -90,7 +89,6 @@
                 </div>
             </div>
 
-            <!-- 2. Способ получения -->
             <div class="bg-white rounded-2xl p-8 shadow-sm">
                 <div class="flex items-center space-x-4 mb-6">
                     <div class="citilink-orange text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</div>
@@ -128,7 +126,6 @@
                 </div>
             </div>
 
-            <!-- 3. Способ оплаты -->
             <div class="bg-white rounded-2xl p-8 shadow-sm">
                 <div class="flex items-center space-x-4 mb-6">
                     <div class="citilink-orange text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">3</div>
@@ -160,7 +157,6 @@
             </div>
         </div>
 
-        <!-- ПРАВАЯ КОЛОНКА (ИТОГО) -->
         <div class="lg:col-span-4">
             <div id="summary-data"
                  th:attr="data-items-price=${itemsPrice ?: 0}, data-delivery-fee=${deliveryFee ?: 0}"

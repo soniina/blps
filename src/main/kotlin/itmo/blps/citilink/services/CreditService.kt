@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service
 @Service
 class CreditService(private val creditApplicationRepository: CreditApplicationRepository) {
 
+    fun getCreditApplicationById(applicationId: Long): CreditApplication? = creditApplicationRepository.findCreditApplicationsById(applicationId)
+
     fun process(request: CreditApplicationRequest, order: Order): CreditApplication {
         return creditApplicationRepository.save(
             CreditApplication(
