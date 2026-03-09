@@ -35,42 +35,42 @@ enum class OrderStatus {
 
 @Entity
 @Table(name = "orders")
-data class Order (
+open class Order (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long? = null,
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    val user: User,
+    var user: User,
 
     @Column(nullable = false)
-    val recipientName: String,
+    var recipientName: String,
 
     @Column(nullable = false)
-    val recipientSurname: String,
+    var recipientSurname: String,
 
     @Column(nullable = false)
-    val recipientPhone: String,
+    var recipientPhone: String,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val receiptMethod: ReceiptMethod = ReceiptMethod.PICKUP,
+    var receiptMethod: ReceiptMethod = ReceiptMethod.PICKUP,
 
-    val deliveryAddress: String? = null,
+    var deliveryAddress: String? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val paymentMethod: PaymentMethod,
+    var paymentMethod: PaymentMethod,
 
     @Column(nullable = false)
-    val itemsPrice: Double,
+    var itemsPrice: Double,
 
     @Column(nullable = false)
-    val deliveryPrice: Double,
+    var deliveryPrice: Double,
 
     @Column(nullable = false)
-    val totalAmount: Double,
+    var totalAmount: Double,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

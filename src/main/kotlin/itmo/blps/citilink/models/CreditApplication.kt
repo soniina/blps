@@ -19,20 +19,20 @@ enum class ApplicationStatus {
 
 @Entity
 @Table(name = "credit_applications")
-data class CreditApplication (
+open class CreditApplication (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long? = null,
 
     @OneToOne
     @JoinColumn(name = "order_id", nullable = false)
-    val order: Order,
+    var order: Order,
 
     @Column(nullable = false)
-    val termMonths: Int = 6,
+    var termMonths: Int = 6,
 
     @Column(nullable = false)
-    val initialPayment: Double = 0.0,
+    var initialPayment: Double = 0.0,
 
     @Column(nullable = false)
     var passportSeries: String,

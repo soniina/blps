@@ -9,22 +9,22 @@ import jakarta.persistence.Table
 
 @Entity
 @Table(name = "products")
-data class Product (
+open class Product (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long? = null,
 
     @Column(nullable = false, unique = true)
-    val name: String,
+    var name: String,
 
     @Column(nullable = false)
-    val price: Double,
+    var price: Double,
 
-    val description: String? = null,
-
-    @Column(nullable = false)
-    val isProductOfDay: Boolean = false,
+    var description: String? = null,
 
     @Column(nullable = false)
-    val stockQuantity: Long
+    var isProductOfDay: Boolean = false,
+
+    @Column(nullable = false)
+    var stockQuantity: Long
 )

@@ -9,18 +9,18 @@ import jakarta.persistence.Table
 
 @Entity
 @Table(name = "users")
-data class User (
+open class User (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long? = null,
 
     @Column(nullable = false, unique = true)
-    val sessionId: String,
+    var sessionId: String,
 
-    val name: String? = null,
+    var name: String? = null,
 
-    val email: String? = null,
+    var email: String? = null,
 
     @Column(length = 20)
-    val phone: String? = null
+    var phone: String? = null
 )

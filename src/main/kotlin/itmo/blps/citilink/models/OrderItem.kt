@@ -11,19 +11,19 @@ import jakarta.persistence.Table
 
 @Entity
 @Table(name = "order_items")
-data class OrderItem (
+open class OrderItem (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long? = null,
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
-    val order: Order,
+    var order: Order,
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
-    val product: Product,
+    var product: Product,
 
     @Column(nullable = false)
-    val quantity: Int = 1
+    var quantity: Int = 1
 )

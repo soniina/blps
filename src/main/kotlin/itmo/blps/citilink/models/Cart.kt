@@ -10,14 +10,14 @@ import jakarta.persistence.Table
 
 @Entity
 @Table(name = "carts")
-data class Cart (
+open class Cart (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long? = null,
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
-    val user: User
+    var user: User
 )
 
 

@@ -11,18 +11,18 @@ import jakarta.persistence.Table
 
 @Entity
 @Table(name = "cart_items")
-data class CartItem (
+open class CartItem (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long? = null,
 
     @ManyToOne
     @JoinColumn(name = "cart_id", nullable = false)
-    val cart: Cart,
+    var cart: Cart,
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
-    val product: Product,
+    var product: Product,
 
     @Column(nullable = false)
     var quantity: Int = 1

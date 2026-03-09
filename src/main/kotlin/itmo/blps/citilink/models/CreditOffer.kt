@@ -10,12 +10,12 @@ import jakarta.persistence.Table
 
 @Entity
 @Table(name = "credit_offers")
-data class CreditOffer (
+open class CreditOffer (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    var id: Long? = null,
 
     @ManyToOne
     @JoinColumn(name = "application_id", nullable = false)
-    val application: CreditApplication
+    var application: CreditApplication
 )
