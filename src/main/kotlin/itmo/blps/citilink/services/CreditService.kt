@@ -8,6 +8,7 @@ import itmo.blps.citilink.models.Order
 import itmo.blps.citilink.models.OrderStatus
 import itmo.blps.citilink.repositories.CreditApplicationRepository
 import itmo.blps.citilink.repositories.CreditOfferRepository
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import kotlin.random.Random
 
@@ -62,6 +63,19 @@ class CreditService(private val creditApplicationRepository: CreditApplicationRe
             application.status = ApplicationStatus.REJECTED
             creditApplicationRepository.save(application)
         }
+    }
+
+    fun getApplicationsForOperator(): List<CreditApplication> {
+        return creditApplicationRepository.findAllByStatus(ApplicationStatus.WAITING_FOR_OPERATOR)
+    }
+
+    @Transactional
+    fun approveOfflineSigning(applicationId: Long) {
+        val application = getCreditApplicationById(applicationId) ?: return
+
+        application.status = ApplicationStatus.SIGNED
+        application.order.status = OrderStatus.PROCESSING
+        creditApplicationRepository.save(application)
     }
 
     fun updateStatus(creditApplication: CreditApplication, status: ApplicationStatus) {

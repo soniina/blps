@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель оператора кредитного отдела</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-10">
+<div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-10">
+        <h1 class="text-3xl font-bold text-gray-800">Реестр заявок на очное подписание</h1>
+        <span class="bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-bold"
+              th:text="${#lists.size(applications)} + ' в очереди'">0 в очереди</span>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-50 text-gray-500 uppercase text-xs font-bold">
+            <tr>
+                <th class="p-4">ID Заявки</th>
+                <th class="p-4">Клиент / Телефон</th>
+                <th class="p-4">Сумма заказа</th>
+                <th class="p-4">Банк</th>
+                <th class="p-4">Действие</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+            <tr th:each="app : ${applications}" class="hover:bg-gray-50 transition">
+                <td class="p-4 font-bold text-gray-800" th:text="'#' + ${app.id}"></td>
+                <td class="p-4">
+                    <div class="font-bold text-gray-700" th:text="${app.order.recipientName} + ' ' + ${app.order.recipientSurname}"></div>
+                    <div class="text-sm text-gray-400" th:text="${app.phone}"></div>
+                </td>
+                <td class="p-4 font-bold" th:text="${app.order.totalAmount} + ' ₽'"></td>
+                <td class="p-4">
+                            <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg text-xs font-bold"
+                                  th:text="${app.selectedOffer?.bankName}">Банк</span>
+                </td>
+                <td class="p-4">
+                    <form th:action="@{/operator/approve/{id}(id=${app.id})}" method="post">
+                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition">
+                            Подтвердить подписание
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(applications)}">
+                <td colspan="5" class="p-10 text-center text-gray-400 italic">
+                    Заявок на очное подписание пока нет.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
