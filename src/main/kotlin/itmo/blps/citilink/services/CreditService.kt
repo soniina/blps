@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 import kotlin.random.Random
 
 @Service
-class CreditService(private val creditApplicationRepository: CreditApplicationRepository, private val creditOfferRepository: CreditOfferRepository) {
+class CreditService(private val creditApplicationRepository: CreditApplicationRepository, private val bankService: BankService) {
 
     fun getCreditApplicationById(applicationId: Long): CreditApplication? = creditApplicationRepository.findCreditApplicationsById(applicationId)
 
@@ -29,41 +29,10 @@ class CreditService(private val creditApplicationRepository: CreditApplicationRe
                 phone = request.phone!!
             )
         )
-        generateFakeBankOffers(application)
+        bankService.generateOffers(application)
         return application
     }
 
-    private fun generateFakeBankOffers(application: CreditApplication){
-        val allBanks = listOf(
-            "Сбербанк", "ВТБ", "Альфа-Банк", "Тинькофф", "Газпромбанк", "Райффайзенбанк", "МТС Банк"
-        )
-        val approvedOffers = mutableListOf<CreditOffer>()
-
-        for (bank in allBanks) {
-            //случайное решение
-            val isApproved = Random.nextDouble() < 0.6
-
-            if (isApproved) {
-                approvedOffers.add(
-                    CreditOffer(
-                        application = application,
-                        bankName = bank,
-                        // ставка от 12 до 22%
-                        interestRate = Random.nextDouble(12.0, 22.0).let { Math.round(it * 10.0) / 10.0 },
-                        isOnlineSigningAvailable = Random.nextBoolean()
-                    )
-                )
-            }
-        }
-        //сохранение предложения, если хотя бы 1 банк оформил
-        if (approvedOffers.isNotEmpty()) {
-            creditOfferRepository.saveAll(approvedOffers)
-        } else {
-            // если все банки отказали
-            application.status = ApplicationStatus.REJECTED
-            creditApplicationRepository.save(application)
-        }
-    }
 
     fun getApplicationsForOperator(): List<CreditApplication> {
         return creditApplicationRepository.findAllByStatus(ApplicationStatus.WAITING_FOR_OPERATOR)
