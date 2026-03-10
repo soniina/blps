@@ -7,15 +7,17 @@ import itmo.blps.citilink.models.CreditOffer
 import itmo.blps.citilink.models.Order
 import itmo.blps.citilink.models.OrderStatus
 import itmo.blps.citilink.repositories.CreditApplicationRepository
+import itmo.blps.citilink.repositories.CreditOfferRepository
 import org.springframework.stereotype.Service
+import kotlin.random.Random
 
 @Service
-class CreditService(private val creditApplicationRepository: CreditApplicationRepository) {
+class CreditService(private val creditApplicationRepository: CreditApplicationRepository, private val creditOfferRepository: CreditOfferRepository) {
 
     fun getCreditApplicationById(applicationId: Long): CreditApplication? = creditApplicationRepository.findCreditApplicationsById(applicationId)
 
     fun process(request: CreditApplicationRequest, order: Order): CreditApplication {
-        return creditApplicationRepository.save(
+        val application = creditApplicationRepository.save(
             CreditApplication(
                 order = order,
                 termMonths = request.termMonths!!,
@@ -26,6 +28,40 @@ class CreditService(private val creditApplicationRepository: CreditApplicationRe
                 phone = request.phone!!
             )
         )
+        generateFakeBankOffers(application)
+        return application
+    }
+
+    private fun generateFakeBankOffers(application: CreditApplication){
+        val allBanks = listOf(
+            "Сбербанк", "ВТБ", "Альфа-Банк", "Тинькофф", "Газпромбанк", "Райффайзенбанк", "МТС Банк"
+        )
+        val approvedOffers = mutableListOf<CreditOffer>()
+
+        for (bank in allBanks) {
+            //случайное решение
+            val isApproved = Random.nextDouble() < 0.6
+
+            if (isApproved) {
+                approvedOffers.add(
+                    CreditOffer(
+                        application = application,
+                        bankName = bank,
+                        // ставка от 12 до 22%
+                        interestRate = Random.nextDouble(12.0, 22.0).let { Math.round(it * 10.0) / 10.0 },
+                        isOnlineSigningAvailable = Random.nextBoolean()
+                    )
+                )
+            }
+        }
+        //сохранение предложения, если хотя бы 1 банк оформил
+        if (approvedOffers.isNotEmpty()) {
+            creditOfferRepository.saveAll(approvedOffers)
+        } else {
+            // если все банки отказали
+            application.status = ApplicationStatus.REJECTED
+            creditApplicationRepository.save(application)
+        }
     }
 
     fun updateStatus(creditApplication: CreditApplication, status: ApplicationStatus) {
