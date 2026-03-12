@@ -22,5 +22,11 @@ open class CreditOffer (
     var application: CreditApplication,
 
     @Column(nullable = false)
+    var bankName: String,
+
+    @Column(nullable = false)
+    var interestRate: Double, 
+
+    @Column(nullable = false)
     var isOnlineSigningAvailable: Boolean = false
 )

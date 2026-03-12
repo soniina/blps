@@ -51,7 +51,7 @@
         <h1 class="text-4xl font-black text-gray-800 mb-6 tracking-tight">Заявка принята!</h1>
 
         <div class="space-y-4 text-lg text-gray-500 mb-10 leading-relaxed">
-            <p>Ваша заявка на кредит успешно одобрена банком <span class="font-bold text-gray-800">Банк</span>.</p>
+            <p>Ваша заявка на кредит успешно одобрена банком <span class="font-bold text-gray-800" th:text="${creditApplication.selectedOffer.bankName}">Название банка</span>
             <p>Пожалуйста, оставайтесь на связи. В ближайшее время вам позвонит <span class="font-bold text-orange-500">менеджер Ситилинка</span> для подписания договора оффлайн.</p>
         </div>
 
