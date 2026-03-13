@@ -15,8 +15,7 @@ enum class ApplicationStatus {
     SENT,
     REJECTED,
     WAITING_FOR_OPERATOR,
-    SIGNED,
-    CANCELLED
+    SIGNED
 }
 
 @Entity

@@ -35,7 +35,6 @@ class BankService(
                 )
             }
         }
-
         if (approvedOffers.isNotEmpty()) {
             creditOfferRepository.saveAll(approvedOffers)
         } else {

@@ -38,7 +38,7 @@
         <a th:href="@{/cart}" class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition relative">
             <div class="relative">
                 <i class="fa-solid fa-cart-shopping text-2xl"></i>
-                <span th:text="${cartItemsCount}"
+                <span th:text="${cartItemsCount ?: 0}"
                       class="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
                         0
                     </span>
@@ -94,7 +94,7 @@
                     </div>
                     <div class="flex justify-between text-gray-500">
                         <span>Банк</span>
-                        <span class="font-bold text-gray-800">Банк-партнер</span>
+                        <span th:text="${creditApplication.selectedOffer.bankName}" class="font-bold text-gray-800">Банк-партнер</span>
                     </div>
                 </div>
 

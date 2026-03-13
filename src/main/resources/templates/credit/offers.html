@@ -34,7 +34,7 @@
         <a th:href="@{/cart}" class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition relative">
             <div class="relative">
                 <i class="fa-solid fa-cart-shopping text-2xl"></i>
-                <span th:text="${cartItemsCount}"
+                <span th:text="${cartItemsCount ?: 0}"
                       class="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
                         0
                     </span>
@@ -67,8 +67,7 @@
 
                 <div class="flex-grow text-center sm:text-left">
                     <div class="flex items-center justify-center sm:justify-start space-x-3 mb-1">
-<!--                        <h3 class="text-lg font-bold text-gray-800">Партнерский банк №<span th:text="${offer.id}">1</span></h3>-->
-                        <h3><span th:text="${offer.bankName}">Название банка</span></h3>
+                        <h3 class="text-lg font-bold text-gray-800" th:text="${offer.bankName}">Название банка</h3>
                         <p class="font-black text-gray-800"><span th:text="${offer.interestRate}">14.5</span>%</p>
                         <span th:if="${offer.isOnlineSigningAvailable}"
                               class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
@@ -79,11 +78,15 @@
                     <div class="flex space-x-6 mt-4">
                         <div>
                             <p class="text-[10px] text-gray-400 uppercase font-bold">Ставка</p>
-                            <p class="font-black text-gray-800">от 14.5%</p>
+                            <p class="font-black text-gray-800">
+                                <span th:text="${offer.interestRate}">0.0</span>%
+                            </p>
                         </div>
                         <div>
-                            <p class="text-[10px] text-gray-400 uppercase font-bold">Платеж</p>
-                            <p class="font-black text-gray-800">~ 4 500 ₽/мес.</p>
+                            <p class="text-[10px] text-gray-400 uppercase font-bold">Ежемесячный платеж</p>
+                            <p class="font-black text-gray-800">
+                                <span th:text="${#numbers.formatDecimal((order.totalAmount * (1 + offer.interestRate / 100)) / 12, 0, 'WHITESPACE', 0, 'POINT')}">0</span> ₽/мес.
+                            </p>
                         </div>
                     </div>
                 </div>
