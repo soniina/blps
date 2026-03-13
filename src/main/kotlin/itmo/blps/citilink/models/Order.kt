@@ -27,10 +27,10 @@ enum class PaymentMethod {
 enum class OrderStatus {
     PENDING,
     PROCESSING,
-    READY_FOR_PICKUP,
-    IN_DELIVERY,
-    COMPLETED,
-    CANCELLED
+//    READY_FOR_PICKUP,
+//    IN_DELIVERY,
+//    COMPLETED,
+//    CANCELLED
 }
 
 @Entity

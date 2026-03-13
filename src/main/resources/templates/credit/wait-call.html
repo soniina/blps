@@ -32,7 +32,7 @@
         <a th:href="@{/cart}" class="flex items-center space-x-2 text-gray-700 hover:text-orange-600 transition relative">
             <div class="relative">
                 <i class="fa-solid fa-cart-shopping text-2xl"></i>
-                <span th:text="${cartItemsCount}"
+                <span th:text="${cartItemsCount ?: 0}"
                       class="absolute -top-2 -right-2 bg-orange-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
                         0
                     </span>
@@ -51,7 +51,7 @@
         <h1 class="text-4xl font-black text-gray-800 mb-6 tracking-tight">Заявка принята!</h1>
 
         <div class="space-y-4 text-lg text-gray-500 mb-10 leading-relaxed">
-            <p>Ваша заявка на кредит успешно одобрена банком <span class="font-bold text-gray-800" th:text="${creditApplication.selectedOffer.bankName}">Название банка</span>
+            <p>Ваша заявка на кредит успешно одобрена банком <span class="font-bold text-gray-800" th:text="${creditApplication.selectedOffer.bankName}">Название банка.</span>
             <p>Пожалуйста, оставайтесь на связи. В ближайшее время вам позвонит <span class="font-bold text-orange-500">менеджер Ситилинка</span> для подписания договора оффлайн.</p>
         </div>
 
