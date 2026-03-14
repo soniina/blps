@@ -76,7 +76,7 @@ class CartController(private val cartService: CartService, private val userServi
 
     @PutMapping
     @RequestMapping("/update/{itemId}")
-    fun minusCartItem(
+    fun updateCartItem(
         @PathVariable itemId: Long,
         @RequestParam delta: Int
     ): String {
