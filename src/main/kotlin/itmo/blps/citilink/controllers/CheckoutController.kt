@@ -16,6 +16,7 @@ import jakarta.validation.Valid
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
+import java.util.UUID
 
 @Controller
 @RequestMapping("/checkout")
@@ -61,15 +62,15 @@ class CheckoutController(private val userService: UserService, private val cartS
         val order = orderService.process(request, user, cartItems)
 
         return when (order.paymentMethod) {
-            PaymentMethod.CREDIT -> "redirect:/credit/${order.id}"
+            PaymentMethod.CREDIT -> "redirect:/credit/${order.uid}"
         }
     }
 
-    @GetMapping("/success/{orderId}")
+    @GetMapping("/success/{orderUid}")
     fun successPage(
-        @PathVariable orderId: Long,
+        @PathVariable orderUid: UUID,
         model: Model): String {
-        val order = orderService.getOrderById(orderId) ?: return "redirect:/"
+        val order = orderService.getOrderByUid(orderUid) ?: return "redirect:/"
 
         model.addAttribute("order", order)
 

@@ -4,6 +4,7 @@ import itmo.blps.citilink.models.CreditApplication
 import itmo.blps.citilink.models.CreditOffer
 import itmo.blps.citilink.repositories.CreditOfferRepository
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class CreditOfferServiceImpl(private val creditOfferRepository: CreditOfferRepository) : CreditOfferService {
@@ -11,6 +12,6 @@ class CreditOfferServiceImpl(private val creditOfferRepository: CreditOfferRepos
     override fun getCreditOffers(application: CreditApplication): List<CreditOffer> =
         creditOfferRepository.findAllByApplicationOrderByIsOnlineSigningAvailableDesc(application)
 
-    override fun getCreditOfferById(offerId: Long) = creditOfferRepository.findCreditOfferById(offerId)
+    override fun getCreditOfferByUid(offerUid: UUID) = creditOfferRepository.findCreditOfferByUid(offerUid)
 
 }

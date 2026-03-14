@@ -10,6 +10,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import java.util.UUID
 
 enum class ApplicationStatus {
     SENT,
@@ -24,6 +25,9 @@ open class CreditApplication (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
+
+    @Column(unique = true, nullable = false)
+    val uid: UUID = UUID.randomUUID(),
 
     @OneToOne
     @JoinColumn(name = "order_id", nullable = false)

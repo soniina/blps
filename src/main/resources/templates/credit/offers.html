@@ -92,7 +92,7 @@
                 </div>
 
                 <div class="w-full sm:w-auto">
-                    <form th:action="@{/credit/select/{id}(id=${offer.id})}" method="post">
+                    <form th:action="@{/credit/select/{id}(id=${offer.uid})}" method="post">
                         <button type="submit" class="w-full sm:px-8 py-3 citilink-orange text-white font-bold rounded-xl citilink-orange-hover transition shadow-lg shadow-orange-100">
                             Выбрать
                         </button>
@@ -107,7 +107,7 @@
                 <div class="space-y-4 mb-8">
                     <div class="flex justify-between text-gray-500">
                         <span>Заказ №</span>
-                        <span class="font-bold text-gray-800" th:text="${order.id}">0</span>
+                        <span class="font-bold text-gray-800" th:text="${order.uid}">0</span>
                     </div>
                     <div class="flex justify-between text-gray-500">
                         <span>Сумма к оформлению</span>

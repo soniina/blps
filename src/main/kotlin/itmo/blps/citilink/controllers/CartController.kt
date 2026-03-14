@@ -43,8 +43,7 @@ class CartController(private val cartService: CartService, private val userServi
         return "cart"
     }
 
-    @PostMapping
-    @RequestMapping("/add")
+    @PostMapping("/add")
     fun addCartItem(
         @CookieValue(value = "session_id", required = false) sessionId: String?,
         @RequestParam(required = true) productId: Long,
@@ -67,22 +66,19 @@ class CartController(private val cartService: CartService, private val userServi
         return "redirect:/"
     }
 
-    @DeleteMapping
-    @RequestMapping("/remove/{itemId}")
-    fun removeCartItem(@PathVariable itemId: Long): String {
-        cartService.removeCartItem(itemId)
+    @DeleteMapping("/remove/{itemUid}")
+    fun removeCartItem(@PathVariable itemUid: UUID): String {
+        cartService.removeCartItem(itemUid)
         return "redirect:/cart"
     }
 
-    @PutMapping
-    @RequestMapping("/update/{itemId}")
+    @PutMapping("/update/{itemUid}")
     fun updateCartItem(
-        @PathVariable itemId: Long,
+        @PathVariable itemUid: UUID,
         @RequestParam delta: Int
     ): String {
-        cartService.updateQuantity(itemId, delta)
+        cartService.updateQuantity(itemUid, delta)
         return "redirect:/cart"
     }
-
 
 }

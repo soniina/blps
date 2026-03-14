@@ -6,9 +6,11 @@ import itmo.blps.citilink.models.Order
 import itmo.blps.citilink.models.ReceiptMethod
 import itmo.blps.citilink.models.User
 import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 interface OrderService {
-    fun getOrderById(orderID: Long): Order?
+    fun getOrderById(orderId: Long): Order?
+    fun getOrderByUid(orderUid: UUID): Order?
 
     @Transactional
     fun process(request: OrderRequest, user: User, items: List<CartItem>): Order

@@ -67,7 +67,7 @@
                     Введите его ниже для подписания кредитного договора.
                 </p>
 
-                <form th:action="@{/credit/confirm-sign/{id}(id=${creditApplication?.id})}" method="post" class="max-w-xs mx-auto">
+                <form th:action="@{/credit/confirm-sign/{id}(id=${creditApplication?.uid})}" method="post" class="max-w-xs mx-auto">
                     <input type="text" name="smsCode" maxlength="4" required
                            class="sms-input w-full border-2 border-gray-100 rounded-2xl py-4 text-3xl font-black focus:border-orange-500 focus:outline-none transition mb-6"
                            placeholder="0000">
@@ -90,7 +90,7 @@
                 <div class="space-y-4 mb-8">
                     <div class="flex justify-between text-gray-500">
                         <span>Заказ №</span>
-                        <span class="font-bold text-gray-800" th:text="${creditApplication.order.id}">0</span>
+                        <span class="font-bold text-gray-800" th:text="${creditApplication.order.uid}">0</span>
                     </div>
                     <div class="flex justify-between text-gray-500">
                         <span>Банк</span>

@@ -79,14 +79,14 @@
                 <div class="flex-grow text-center sm:text-left">
                     <h3 th:text="${item.product.name}" class="text-lg font-bold text-gray-800 mb-1 leading-tight">Название товара</h3>
                     <p class="text-sm text-gray-400 mb-4" th:text="'Код: ' + (100000 + ${item.product.id})">Код: 123456</p>
-                    <form th:action="@{/cart/remove/{id}(id=${item.id})}" th:method="delete" class="inline">
+                    <form th:action="@{/cart/remove/{uid}(uid=${item.uid})}" th:method="delete" class="inline">
                         <button type="submit" class="text-xs font-bold text-gray-400 hover:text-red-500 transition uppercase tracking-wider flex items-center">
                             <i class="fa-solid fa-trash-can mr-1"></i> Удалить
                         </button>
                     </form>
                 </div>
                 <div class="flex items-center space-x-3 bg-gray-50 p-2 rounded-xl">
-                    <form th:action="@{/cart/update/{id}(id=${item.id})}" th:method="put" class="inline">
+                    <form th:action="@{/cart/update/{uid}(uid=${item.uid})}" th:method="put" class="inline">
                         <input type="hidden" name="delta" value="-1">
                         <button type="submit"
                                 th:disabled="${item.quantity <= 1}"
@@ -95,7 +95,7 @@
                         </button>
                     </form>
                     <span th:text="${item.quantity}" class="w-8 text-center font-bold text-lg">1</span>
-                    <form th:action="@{/cart/update/{id}(id=${item.id})}" th:method="put" class="inline">
+                    <form th:action="@{/cart/update/{uid}(uid=${item.uid})}" th:method="put" class="inline">
                         <input type="hidden" name="delta" value="1">
                         <button type="submit"
                                 th:disabled="${item.quantity >= item.product.stockQuantity}"

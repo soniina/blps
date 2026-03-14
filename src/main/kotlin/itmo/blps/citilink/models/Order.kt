@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import java.time.LocalDateTime
+import java.util.UUID
 
 enum class ReceiptMethod {
     PICKUP,
@@ -39,6 +40,9 @@ open class Order (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
+
+    @Column(unique = true, nullable = false)
+    val uid: UUID = UUID.randomUUID(),
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

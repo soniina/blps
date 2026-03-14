@@ -9,12 +9,13 @@ import itmo.blps.citilink.models.OrderStatus
 import itmo.blps.citilink.repositories.CreditApplicationRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class CreditServiceImpl(private val creditApplicationRepository: CreditApplicationRepository, private val bankService: BankService) :
     CreditService {
 
-    override fun getCreditApplicationById(applicationId: Long): CreditApplication? = creditApplicationRepository.findCreditApplicationsById(applicationId)
+    override fun getCreditApplicationByUid(applicationUid: UUID): CreditApplication? = creditApplicationRepository.findCreditApplicationsByUid(applicationUid)
 
     override fun process(request: CreditApplicationRequest, order: Order): CreditApplication {
         val application = creditApplicationRepository.save(
@@ -38,8 +39,8 @@ class CreditServiceImpl(private val creditApplicationRepository: CreditApplicati
     }
 
     @Transactional
-    override fun approveOfflineSigning(applicationId: Long) {
-        val application = getCreditApplicationById(applicationId) ?: return
+    override fun approveOfflineSigning(applicationUid: UUID) {
+        val application = getCreditApplicationByUid(applicationUid) ?: return
 
         application.status = ApplicationStatus.SIGNED
         application.order.status = OrderStatus.PROCESSING

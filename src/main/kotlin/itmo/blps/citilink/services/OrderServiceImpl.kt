@@ -10,12 +10,14 @@ import itmo.blps.citilink.repositories.OrderItemRepository
 import itmo.blps.citilink.repositories.OrderRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 @Service
 class OrderServiceImpl(private val orderRepository: OrderRepository, private val orderItemRepository: OrderItemRepository,
                        private val cartService: CartService) : OrderService {
 
-    override fun getOrderById(orderID: Long): Order? = orderRepository.findOrderById(orderID)
+    override fun getOrderById(orderId: Long): Order? = orderRepository.findOrderById(orderId)
+    override fun getOrderByUid(orderUid: UUID): Order? = orderRepository.findOrderByUid(orderUid)
 
     @Transactional
     override fun process(request: OrderRequest, user: User, items: List<CartItem>): Order {

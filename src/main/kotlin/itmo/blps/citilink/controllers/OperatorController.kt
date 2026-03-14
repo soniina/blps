@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import java.util.UUID
 
 @Controller
 @RequestMapping("/operator")
 class OperatorController(private val creditService: CreditService) {
+
     @GetMapping("/dashboard")
     fun showDashboard(model: Model): String {
         val pendingApplications = creditService.getApplicationsForOperator()
@@ -18,9 +20,9 @@ class OperatorController(private val creditService: CreditService) {
         return "operator/dashboard"
     }
 
-    @PostMapping("/approve/{id}")
-    fun approveApplication(@PathVariable id: Long): String {
-        creditService.approveOfflineSigning(id)
+    @PostMapping("/approve/{applicationUid}")
+    fun approveApplication(@PathVariable applicationUid: UUID): String {
+        creditService.approveOfflineSigning(applicationUid)
         return "redirect:/operator/dashboard"
     }
 }
