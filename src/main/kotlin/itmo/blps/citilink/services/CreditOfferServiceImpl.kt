@@ -14,4 +14,8 @@ class CreditOfferServiceImpl(private val creditOfferRepository: CreditOfferRepos
 
     override fun getCreditOfferByUid(offerUid: UUID) = creditOfferRepository.findCreditOfferByUid(offerUid)
 
+    override fun saveCreditOffers(creditOffers: List<CreditOffer>) {
+        creditOfferRepository.saveAll(creditOffers)
+    }
+
 }

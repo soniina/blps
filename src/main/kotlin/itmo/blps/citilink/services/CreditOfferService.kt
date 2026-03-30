@@ -7,4 +7,5 @@ import java.util.UUID
 interface CreditOfferService {
     fun getCreditOffers(application: CreditApplication): List<CreditOffer>
     fun getCreditOfferByUid(offerUid: UUID): CreditOffer?
+    fun saveCreditOffers(creditOffers: List<CreditOffer>)
 }
