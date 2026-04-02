@@ -8,23 +8,25 @@ import jakarta.validation.constraints.Pattern
 
 data class OrderRequest (
     @field:NotBlank(message = "Имя обязательно")
-    var name: String? = null,
+    val name: String? = null,
 
     @field:NotBlank(message = "Фамилия обязательна")
-    var surname: String? = null,
+    val surname: String? = null,
 
     @field:NotBlank(message = "Телефон обязателен")
     @field:Pattern(regexp = "^(\\+7|8)[0-9]{10}$", message = "Неверный формат телефона")
-    var phone: String? = null,
+    val phone: String? = null,
 
-    var receiptMethod: ReceiptMethod = ReceiptMethod.PICKUP,
+    val receiptMethod: ReceiptMethod = ReceiptMethod.PICKUP,
 
-    var deliveryAddress: String? = null,
+    val deliveryAddress: String? = null,
 
     val paymentMethod: PaymentMethod = PaymentMethod.CREDIT,
 ) {
     @get:AssertTrue(message = "При выборе доставки необходимо указать адрес")
     val deliveryAddressValid: Boolean
-        get() = if (receiptMethod == ReceiptMethod.DELIVERY) !deliveryAddress.isNullOrBlank()
-                else true
+        get() {
+            if (receiptMethod == ReceiptMethod.DELIVERY) return !deliveryAddress.isNullOrBlank()
+            return true
+        }
 }

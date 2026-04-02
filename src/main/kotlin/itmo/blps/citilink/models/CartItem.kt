@@ -8,7 +8,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import java.util.UUID
 
 @Entity
 @Table(name = "cart_items")
@@ -16,9 +15,6 @@ open class CartItem (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-
-    @Column(unique = true, nullable = false)
-    val uid: UUID = UUID.randomUUID(),
 
     @ManyToOne
     @JoinColumn(name = "cart_id", nullable = false)

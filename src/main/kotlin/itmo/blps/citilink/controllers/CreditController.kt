@@ -14,30 +14,29 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import java.util.UUID
 
 @Controller
 @RequestMapping("/credit")
 class CreditController(private val creditService: CreditService, private val orderService: OrderService, private val creditOfferService: CreditOfferService) {
 
-    @GetMapping("/{orderUid}")
-    fun showApplicationPage(@PathVariable orderUid: UUID, model: Model): String {
-        val order = orderService.getOrderByUid(orderUid) ?: return "redirect:/"
+    @GetMapping("/{orderId}")
+    fun showApplicationPage(@PathVariable orderId: Long, model: Model): String {
+        val order = orderService.getOrderById(orderId) ?: return "redirect:/"
 
-        model.addAttribute("creditRequest", CreditApplicationRequest())
+        model.addAttribute("creditRequest", CreditApplicationRequest(orderId = orderId))
         model.addAttribute("order", order)
 
         return "credit/apply"
     }
 
-    @PostMapping("/{orderUid}")
+    @PostMapping("/{orderId}")
     fun processCredit(
-        @PathVariable orderUid: UUID,
+        @PathVariable orderId: Long,
         @Valid @ModelAttribute("creditRequest") request: CreditApplicationRequest,
         bindingResult: BindingResult,
         model: Model
     ): String {
-        val order = orderService.getOrderByUid(orderUid) ?: return "redirect:/"
+        val order = orderService.getOrderById(orderId) ?: return "redirect:/"
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("order", order)
@@ -46,14 +45,14 @@ class CreditController(private val creditService: CreditService, private val ord
 
         val creditApplication = creditService.process(request, order)
 
-        return "redirect:/credit/offers/${creditApplication.uid}"
+        return "redirect:/credit/offers/${creditApplication.id}"
     }
 
-    @GetMapping("/offers/{applicationUid}")
+    @GetMapping("/offers/{applicationId}")
     fun listCreditOffers(
-        @PathVariable applicationUid: UUID,
+        @PathVariable applicationId: Long,
         model: Model): String {
-        val creditApplication = creditService.getCreditApplicationByUid(applicationUid) ?: return "redirect:/"
+        val creditApplication = creditService.getCreditApplicationById(applicationId) ?: return "redirect:/"
 
         val offers = creditOfferService.getCreditOffers(creditApplication)
 
@@ -64,47 +63,47 @@ class CreditController(private val creditService: CreditService, private val ord
         return "credit/offers"
     }
 
-    @PostMapping("/select/{offerUid}")
+    @PostMapping("/select/{offerId}")
     fun selectOffer(
-        @PathVariable offerUid: UUID,
+        @PathVariable offerId: Long,
         model: Model): String {
 
-        val offer = creditOfferService.getCreditOfferByUid(offerUid) ?: return "redirect:/"
+        val offer = creditOfferService.getCreditOfferById(offerId) ?: return "redirect:/"
         val application = offer.application
 
         creditService.selectOffer(application, offer)
 
         return if (offer.isOnlineSigningAvailable) {
-            "redirect:/credit/sign-online/${application.uid}"
+            "redirect:/credit/sign-online/${application.id}"
         } else {
             creditService.updateStatus(application, ApplicationStatus.WAITING_FOR_OPERATOR)
-            "redirect:/credit/wait-call/${application.uid}"
+            "redirect:/credit/wait-call/${application.id}"
         }
     }
 
-    @GetMapping("/sign-online/{applicationUid}")
+    @GetMapping("/sign-online/{applicationId}")
     fun showSignOnline(
-        @PathVariable applicationUid: UUID,
+        @PathVariable applicationId: Long,
         model: Model): String {
-        val application = creditService.getCreditApplicationByUid(applicationUid) ?: return "redirect:/"
+        val application = creditService.getCreditApplicationById(applicationId) ?: return "redirect:/"
 
         model.addAttribute("creditApplication", application)
         model.addAttribute("order", application.order)
         return "credit/sign-online"
     }
 
-    @PostMapping("/confirm-sign/{applicationUid}")
-    fun confirmSign(@PathVariable applicationUid: UUID): String {
-        val application = creditService.getCreditApplicationByUid(applicationUid) ?: return "redirect:/"
+    @PostMapping("/confirm-sign/{applicationId}")
+    fun confirmSign(@PathVariable applicationId: Long): String {
+        val application = creditService.getCreditApplicationById(applicationId) ?: return "redirect:/"
 
         creditService.signApplication(application)
 
-        return "redirect:/checkout/success/${application.order.uid}"
+        return "redirect:/checkout/success/${application.order.id}"
     }
 
-    @GetMapping("/wait-call/{applicationUid}")
-    fun showWaitCall(@PathVariable applicationUid: UUID, model: Model): String {
-        val application = creditService.getCreditApplicationByUid(applicationUid) ?: return "redirect:/"
+    @GetMapping("/wait-call/{applicationId}")
+    fun showWaitCall(@PathVariable applicationId: Long, model: Model): String {
+        val application = creditService.getCreditApplicationById(applicationId) ?: return "redirect:/"
 
         model.addAttribute("creditApplication", application)
 
