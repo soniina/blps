@@ -1,4 +1,4 @@
-package itmo.blps.citilink.dto
+package itmo.blps.citilink.dto.requests
 
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.Max

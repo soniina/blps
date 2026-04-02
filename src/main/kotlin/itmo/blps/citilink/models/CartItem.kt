@@ -10,7 +10,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "cart_items")
+@Table(name = "carts_items")
 open class CartItem (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,17 +1,19 @@
 package itmo.blps.citilink.services
 
+import itmo.blps.citilink.models.Cart
 import itmo.blps.citilink.models.CartItem
 import itmo.blps.citilink.models.Product
 import itmo.blps.citilink.models.User
 import org.springframework.transaction.annotation.Transactional
 
 interface CartService {
-    fun getCartItems(user: User): List<CartItem>
+    fun getOrCreateCart(user: User): Cart
+    fun getCartItems(cart: Cart): List<CartItem>
 
     @Transactional
-    fun addCartItem(product: Product, user: User)
-    fun removeCartItem(itemId: Long)
-    fun updateQuantity(itemId: Long, delta: Int)
+    fun addCartItem(product: Product, user: User): Cart
+    fun removeCartItem(itemId: Long, user: User): Cart
+    fun updateQuantity(itemId: Long, quantity: Int, user: User): Cart
 
     @Transactional
     fun clearCart(user: User)

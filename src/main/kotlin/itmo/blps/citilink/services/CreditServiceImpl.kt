@@ -1,6 +1,6 @@
 package itmo.blps.citilink.services
 
-import itmo.blps.citilink.dto.CreditApplicationRequest
+import itmo.blps.citilink.dto.requests.CreditApplicationRequest
 import itmo.blps.citilink.models.ApplicationStatus
 import itmo.blps.citilink.models.CreditApplication
 import itmo.blps.citilink.models.CreditOffer

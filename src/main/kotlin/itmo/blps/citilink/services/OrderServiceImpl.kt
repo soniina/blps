@@ -1,6 +1,6 @@
 package itmo.blps.citilink.services
 
-import itmo.blps.citilink.dto.OrderRequest
+import itmo.blps.citilink.dto.requests.OrderRequest
 import itmo.blps.citilink.models.CartItem
 import itmo.blps.citilink.models.Order
 import itmo.blps.citilink.models.OrderItem

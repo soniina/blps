@@ -1,4 +1,4 @@
-package itmo.blps.citilink.dto
+package itmo.blps.citilink.dto.requests
 
 import itmo.blps.citilink.models.PaymentMethod
 import itmo.blps.citilink.models.ReceiptMethod
