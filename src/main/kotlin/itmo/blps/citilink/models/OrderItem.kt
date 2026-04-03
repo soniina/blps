@@ -3,7 +3,7 @@ package itmo.blps.citilink.models
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "order_items")
+@Table(name = "orders_items")
 open class OrderItem(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
