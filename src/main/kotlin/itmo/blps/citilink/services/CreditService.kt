@@ -5,10 +5,11 @@ import itmo.blps.citilink.models.ApplicationStatus
 import itmo.blps.citilink.models.CreditApplication
 import itmo.blps.citilink.models.CreditOffer
 import itmo.blps.citilink.models.Order
+import itmo.blps.citilink.models.User
 import jakarta.transaction.Transactional
 
 interface CreditService {
-    fun getCreditApplicationById(applicationId: Long): CreditApplication?
+    fun getCreditApplication(applicationId: Long, user: User): CreditApplication
     fun process(request: CreditApplicationRequest, order: Order): CreditApplication
     fun getApplicationsForOperator(): List<CreditApplication>
 
