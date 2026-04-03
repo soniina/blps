@@ -3,9 +3,7 @@ package itmo.blps.citilink.controllers
 import itmo.blps.citilink.dto.requests.CreditApplicationRequest
 import itmo.blps.citilink.dto.responses.CreditApplicationResponse
 import itmo.blps.citilink.dto.responses.CreditOfferResponse
-import itmo.blps.citilink.dto.responses.OrderResponse
 import itmo.blps.citilink.dto.responses.toResponse
-import itmo.blps.citilink.models.ApplicationStatus
 import itmo.blps.citilink.services.CreditOfferService
 import itmo.blps.citilink.services.CreditService
 import itmo.blps.citilink.services.OrderService
@@ -14,7 +12,6 @@ import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 
 @Controller
@@ -67,17 +64,13 @@ class CreditController(
     fun signApplication(
         @CookieValue("session_id") sessionId: String,
         @PathVariable applicationId: Long
-    ): ResponseEntity<OrderResponse> {
+    ): ResponseEntity<CreditApplicationResponse> {
         val user = userService.getUser(sessionId)
         val application = creditService.getCreditApplication(applicationId, user)
 
-        if (application.selectedOffer?.isOnlineSigningAvailable != true) {
-            throw IllegalStateException("Online signing is not available for this offer")
-        }
-
         creditService.signApplication(application)
 
-        return ResponseEntity.ok(application.order.toResponse())
+        return ResponseEntity.ok(application.toResponse())
     }
 
 }

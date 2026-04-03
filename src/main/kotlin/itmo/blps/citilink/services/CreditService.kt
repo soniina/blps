@@ -14,9 +14,9 @@ interface CreditService {
     fun getApplicationsForOperator(): List<CreditApplication>
 
     @Transactional
-    fun approveOfflineSigning(applicationId: Long)
+    fun approveOfflineSigning(applicationId: Long) : CreditApplication
     fun updateStatus(creditApplication: CreditApplication, status: ApplicationStatus)
-    fun selectOffer(creditApplication: CreditApplication, selectedOffer: CreditOffer)
+    fun selectOffer(creditApplication: CreditApplication, offer: CreditOffer)
 
     @Transactional
     fun signApplication(creditApplication: CreditApplication)

@@ -1,26 +1,31 @@
 package itmo.blps.citilink.controllers
 
-import org.springframework.ui.Model
+import itmo.blps.citilink.dto.responses.CreditApplicationResponse
+import itmo.blps.citilink.dto.responses.toResponse
 import itmo.blps.citilink.services.CreditService
-import org.springframework.stereotype.Controller
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
-@Controller
+@RestController
 @RequestMapping("/operator")
 class OperatorController(private val creditService: CreditService) {
-    @GetMapping("/dashboard")
-    fun showDashboard(model: Model): String {
+
+    @GetMapping("/applications")
+    fun getDashboard(): ResponseEntity<List<CreditApplicationResponse>> {
         val pendingApplications = creditService.getApplicationsForOperator()
-        model.addAttribute("applications", pendingApplications)
-        return "operator/dashboard"
+
+        return ResponseEntity.ok(pendingApplications.map { it.toResponse() })
     }
 
-    @PostMapping("/approve/{id}")
-    fun approveApplication(@PathVariable id: Long): String {
-        creditService.approveOfflineSigning(id)
-        return "redirect:/operator/dashboard"
+    @PostMapping("/applications/{applicationId}/approve")
+    fun approveApplication(@PathVariable applicationId: Long): ResponseEntity<CreditApplicationResponse> {
+        val application = creditService.approveOfflineSigning(applicationId)
+
+        return ResponseEntity.ok(application.toResponse())
     }
+
 }

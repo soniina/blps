@@ -15,6 +15,7 @@ enum class ApplicationStatus {
     SENT,
     REJECTED,
     WAITING_FOR_OPERATOR,
+    PENDING_SIGNATURE,
     SIGNED
 }
 

@@ -45,12 +45,16 @@ class CreditServiceImpl(
     }
 
     @Transactional
-    override fun approveOfflineSigning(applicationId: Long) {
-        val application = getCreditApplication(applicationId) ?: return
+    override fun approveOfflineSigning(applicationId: Long): CreditApplication {
+        val application = creditApplicationRepository.findById(applicationId)
+            .orElseThrow { EntityNotFoundException("CreditApplication with id $applicationId not found") }
+        // заменить на getCreditApplication, передавая оператора (User, user.role = Operator)
+        // val application = getCreditApplication(applicationId, user)
+        // if (user.role != OPERATOR) throw AccessDeniedException("Access denied")
 
         application.status = ApplicationStatus.SIGNED
         application.order.status = OrderStatus.PROCESSING
-        creditApplicationRepository.save(application)
+        return creditApplicationRepository.save(application)
     }
 
     override fun updateStatus(creditApplication: CreditApplication, status: ApplicationStatus) {
@@ -58,13 +62,27 @@ class CreditServiceImpl(
         creditApplicationRepository.save(creditApplication)
     }
 
-    override fun selectOffer(creditApplication: CreditApplication, selectedOffer: CreditOffer) {
-        creditApplication.selectedOffer = selectedOffer
+    @Transactional
+    override fun selectOffer(creditApplication: CreditApplication, offer: CreditOffer) {
+        creditApplication.selectedOffer = offer
+
+        if (offer.isOnlineSigningAvailable) creditApplication.status = ApplicationStatus.PENDING_SIGNATURE
+        else creditApplication.status = ApplicationStatus.WAITING_FOR_OPERATOR
+
         creditApplicationRepository.save(creditApplication)
     }
 
     @Transactional
     override fun signApplication(creditApplication: CreditApplication) {
+        val selectedOffer = creditApplication.selectedOffer
+            ?: throw IllegalStateException("No offer selected for this application. Please select an offer first.")
+
+        if (!selectedOffer.isOnlineSigningAvailable)
+            throw IllegalStateException("Online signing is not available for this offer")
+
+        if (creditApplication.status != ApplicationStatus.PENDING_SIGNATURE)
+            throw IllegalStateException("This application has already been signed.")
+
         creditApplication.status = ApplicationStatus.SIGNED
         creditApplication.order.status = OrderStatus.PROCESSING
         creditApplicationRepository.save(creditApplication)
