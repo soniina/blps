@@ -5,4 +5,5 @@ import itmo.blps.citilink.models.Product
 interface ProductService {
     fun getProductsOfDay(): List<Product>
     fun getProductById(productId: Long): Product
+    fun decreaseStock(productId: Long, quantity: Int)
 }

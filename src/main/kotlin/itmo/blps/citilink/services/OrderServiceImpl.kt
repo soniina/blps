@@ -8,18 +8,26 @@ import itmo.blps.citilink.models.ReceiptMethod
 import itmo.blps.citilink.models.User
 import itmo.blps.citilink.repositories.OrderItemRepository
 import itmo.blps.citilink.repositories.OrderRepository
+import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+//import org.springframework.security.access.AccessDeniedException
 
 @Service
 class OrderServiceImpl(private val orderRepository: OrderRepository, private val orderItemRepository: OrderItemRepository,
-                       private val cartService: CartService) : OrderService {
+                       private val productService: ProductService, private val cartService: CartService) : OrderService {
 
-    override fun getOrderById(orderID: Long): Order? = orderRepository.findOrderById(orderID)
+    override fun getOrder(orderId: Long, user: User): Order {
+        val order = orderRepository.findOrderById(orderId) ?: throw EntityNotFoundException("Order with id $orderId not found")
+
+//        if (order.user.id != user.id) throw AccessDeniedException("Access denied")
+
+        return order
+    }
 
     @Transactional
     override fun process(request: OrderRequest, user: User, items: List<CartItem>): Order {
-        if (items.isEmpty()) throw IllegalStateException("Корзина пуста")
+        if (items.isEmpty()) throw IllegalStateException("Cannot place order with empty cart")
 
         val itemsPrice = items.sumOf { it.product.price * it.quantity }
         val deliveryPrice = calculateDeliveryPrice(request.receiptMethod, itemsPrice)
@@ -38,6 +46,8 @@ class OrderServiceImpl(private val orderRepository: OrderRepository, private val
         ))
 
         items.forEach { item ->
+            productService.decreaseStock(item.product.id!!, item.quantity)
+
             orderItemRepository.save(OrderItem(
                 order = order,
                 product = item.product,
@@ -46,12 +56,10 @@ class OrderServiceImpl(private val orderRepository: OrderRepository, private val
         }
 
         cartService.clearCart(user)
-
         return order
-
     }
 
-    override fun calculateDeliveryPrice(method: ReceiptMethod, totalAmount: Double): Double {
+    private fun calculateDeliveryPrice(method: ReceiptMethod, totalAmount: Double): Double {
         if (method == ReceiptMethod.PICKUP) return 0.0
         return if (totalAmount >= 10000.0) 0.0 else 500.0
     }

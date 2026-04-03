@@ -15,9 +15,11 @@ import org.springframework.transaction.annotation.Transactional
 class CartServiceImpl(private val cartRepository: CartRepository, private val cartItemRepository: CartItemRepository) :
     CartService {
 
-    override fun getOrCreateCart(user: User): Cart {
-        return cartRepository.findCartByUser(user) ?: cartRepository.save(Cart(user = user))
-    }
+    override fun getCart(user: User) = cartRepository.findCartByUser(user)
+        ?: throw EntityNotFoundException("Cart for user with session_id ${user.sessionId} not found")
+
+    override fun getOrCreateCart(user: User) =
+        cartRepository.findCartByUser(user) ?: cartRepository.save(Cart(user = user))
 
     override fun getCartItems(cart: Cart): List<CartItem> = cartItemRepository.findAllByCartOrderByIdAsc(cart)
 

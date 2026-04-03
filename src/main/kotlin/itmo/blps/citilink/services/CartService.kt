@@ -7,6 +7,7 @@ import itmo.blps.citilink.models.User
 import org.springframework.transaction.annotation.Transactional
 
 interface CartService {
+    fun getCart(user: User): Cart
     fun getOrCreateCart(user: User): Cart
     fun getCartItems(cart: Cart): List<CartItem>
 
