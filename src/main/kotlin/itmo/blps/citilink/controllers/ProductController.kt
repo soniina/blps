@@ -12,7 +12,11 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/products")
-class ProductController(private val productService: ProductService, private val userService: UserService, private val cartService: CartService) {
+class ProductController(
+    private val productService: ProductService,
+    private val userService: UserService,
+    private val cartService: CartService
+) {
 
     @GetMapping("/of-the-day")
     fun getProductsOfDay(): ResponseEntity<List<ProductResponse>> {

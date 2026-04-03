@@ -6,7 +6,7 @@ import jakarta.validation.constraints.AssertTrue
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 
-data class OrderRequest (
+data class OrderRequest(
     @field:NotBlank(message = "Имя обязательно")
     val name: String? = null,
 

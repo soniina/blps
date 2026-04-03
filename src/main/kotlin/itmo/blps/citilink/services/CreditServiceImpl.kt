@@ -6,6 +6,7 @@ import itmo.blps.citilink.repositories.CreditApplicationRepository
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+
 //import org.springframework.security.access.AccessDeniedException
 
 @Service
@@ -16,7 +17,8 @@ class CreditServiceImpl(
 ) : CreditService {
 
     override fun getCreditApplication(applicationId: Long, user: User): CreditApplication {
-        val application = creditApplicationRepository.findCreditApplicationsById(applicationId) ?: throw EntityNotFoundException("CreditApplication with id $applicationId not found")
+        val application = creditApplicationRepository.findCreditApplicationsById(applicationId)
+            ?: throw EntityNotFoundException("CreditApplication with id $applicationId not found")
 
 //        if (application.order.user.id != user.id) throw AccessDeniedException("Access denied")
 

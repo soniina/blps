@@ -11,11 +11,10 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
     override fun findUser(sessionId: String) = userRepository.findBySessionId(sessionId)
 
     override fun getUser(sessionId: String) = userRepository.findBySessionId(sessionId)
-            ?: throw EntityNotFoundException("Invalid or expired session")
+        ?: throw EntityNotFoundException("Invalid or expired session")
 
     override fun getOrCreateUser(sessionId: String): User {
-        return userRepository.findBySessionId(sessionId) ?:
-            userRepository.save(User(sessionId = sessionId))
+        return userRepository.findBySessionId(sessionId) ?: userRepository.save(User(sessionId = sessionId))
     }
 
 }

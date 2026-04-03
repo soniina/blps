@@ -9,6 +9,7 @@ import itmo.blps.citilink.repositories.CartRepository
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+
 //import org.springframework.security.access.AccessDeniedException
 
 @Service
@@ -40,7 +41,8 @@ class CartServiceImpl(private val cartRepository: CartRepository, private val ca
 
     @Transactional
     override fun removeCartItem(itemId: Long, user: User): Cart {
-        val item = cartItemRepository.findCartItemById(itemId) ?: throw EntityNotFoundException("Cart item with id $itemId not found")
+        val item = cartItemRepository.findCartItemById(itemId)
+            ?: throw EntityNotFoundException("Cart item with id $itemId not found")
 
 //        if (item.cart.user.id != user.id) throw AccessDeniedException("Access denied")
 
@@ -51,7 +53,8 @@ class CartServiceImpl(private val cartRepository: CartRepository, private val ca
 
     @Transactional
     override fun updateQuantity(itemId: Long, quantity: Int, user: User): Cart {
-        val item = cartItemRepository.findCartItemById(itemId) ?: throw EntityNotFoundException("Cart item with id $itemId not found")
+        val item = cartItemRepository.findCartItemById(itemId)
+            ?: throw EntityNotFoundException("Cart item with id $itemId not found")
 
 //        if (item.cart.user.id != user.id) throw AccessDeniedException("Access denied")
         if (quantity < 1) throw IllegalArgumentException("Quantity must be at least 1")

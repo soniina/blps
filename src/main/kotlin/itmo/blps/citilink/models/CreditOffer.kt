@@ -1,18 +1,10 @@
 package itmo.blps.citilink.models
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.Table
-import org.hibernate.annotations.Columns
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "credit_offers")
-open class CreditOffer (
+open class CreditOffer(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
@@ -25,7 +17,7 @@ open class CreditOffer (
     var bankName: String,
 
     @Column(nullable = false)
-    var interestRate: Double, 
+    var interestRate: Double,
 
     @Column(nullable = false)
     var isOnlineSigningAvailable: Boolean = false

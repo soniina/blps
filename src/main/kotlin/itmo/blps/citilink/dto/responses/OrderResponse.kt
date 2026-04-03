@@ -6,7 +6,7 @@ import itmo.blps.citilink.models.PaymentMethod
 import itmo.blps.citilink.models.ReceiptMethod
 import java.time.LocalDateTime
 
-data class OrderResponse (
+data class OrderResponse(
     val id: Long,
 
     val status: OrderStatus,

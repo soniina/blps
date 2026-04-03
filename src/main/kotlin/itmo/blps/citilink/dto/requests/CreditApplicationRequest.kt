@@ -1,17 +1,11 @@
 package itmo.blps.citilink.dto.requests
 
-import jakarta.validation.constraints.Email
-import jakarta.validation.constraints.Max
-import jakarta.validation.constraints.Min
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
-import jakarta.validation.constraints.Pattern
-import jakarta.validation.constraints.Positive
+import jakarta.validation.constraints.*
 
-data class CreditApplicationRequest (
+data class CreditApplicationRequest(
 
     @field:Positive
-    val orderId : Long,
+    val orderId: Long,
 
     @field:NotNull(message = "Выберите срок кредита")
     @field:Min(3) @field:Max(36)

@@ -2,7 +2,7 @@ package itmo.blps.citilink.dto.responses
 
 import itmo.blps.citilink.models.CartItem
 
-data class CartItemResponse (
+data class CartItemResponse(
     val id: Long,
     val product: ProductResponse,
     val quantity: Int

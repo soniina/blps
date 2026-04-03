@@ -4,11 +4,7 @@ import itmo.blps.citilink.dto.responses.CreditApplicationResponse
 import itmo.blps.citilink.dto.responses.toResponse
 import itmo.blps.citilink.services.CreditService
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/operator")
