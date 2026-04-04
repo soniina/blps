@@ -7,5 +7,6 @@ import org.springframework.boot.runApplication
 class CitilinkApplication
 
 fun main(args: Array<String>) {
+    System.setProperty("java.security.auth.login.config", "src/main/resources/jaas.config")
     runApplication<CitilinkApplication>(*args)
 }
