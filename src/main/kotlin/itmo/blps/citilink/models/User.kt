@@ -10,7 +10,8 @@ open class User(
     var id: Long? = null,
 
     @Column(nullable = false, unique = true)
-    var sessionId: String,
+    //var sessionId: String,
+    var username: String,
 
     var name: String? = null,
 

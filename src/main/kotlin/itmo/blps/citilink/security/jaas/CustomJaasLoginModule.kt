@@ -1,6 +1,7 @@
 package itmo.blps.citilink.security.jaas
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import itmo.blps.citilink.security.model.UsersList
 import java.io.File
 import javax.security.auth.Subject
@@ -9,6 +10,7 @@ import javax.security.auth.callback.NameCallback
 import javax.security.auth.callback.PasswordCallback
 import javax.security.auth.spi.LoginModule
 import javax.security.auth.callback.Callback
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 
 class CustomJaasLoginModule : LoginModule {
     private var role: String? = null
@@ -27,6 +29,7 @@ class CustomJaasLoginModule : LoginModule {
             NameCallback("username"),
             PasswordCallback("password", false)
         )
+        val encoder = org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder()
 
         callbackHandler.handle(callbacks)
 
@@ -39,11 +42,39 @@ class CustomJaasLoginModule : LoginModule {
                 ?: Thread.currentThread().contextClassLoader.getResourceAsStream("users.xml")
                 ?: throw Exception("Файл users.xml не найден!")
 
-            val xmlMapper = com.fasterxml.jackson.dataformat.xml.XmlMapper()
+            //val xmlMapper = com.fasterxml.jackson.dataformat.xml.XmlMapper()
+            val xmlMapper = XmlMapper.builder()
+                .addModule(KotlinModule.Builder().build())
+                .build()
+            //val usersList = xmlMapper.readValue(inputStream, UsersList::class.java)
             val usersList = xmlMapper.readValue(inputStream, UsersList::class.java)
+            usersList.users.forEach {
+                println("DEBUG XML: Прочитан юзер [${it.username}], роль [${it.role}]")
+            }
 
             println("JAAS: Загружено пользователей из XML: ${usersList.users.size}")
-            val foundUser = usersList.users.find { it.username == inputUser && it.password == inputPass }
+            //val foundUser = usersList.users.find { it.username == inputUser && it.password == inputPass }
+//            val foundUser = usersList.users.find {
+//                it.username == inputUser && encoder.matches(inputPass, it.password)
+//            }
+            val foundUser = usersList.users.find {
+                val usernameMatch = it.username.trim() == inputUser.trim()
+
+                if (usernameMatch) {
+                    val cleanXmlHash = it.password.replace("\\s".toRegex(), "")
+
+                    println("--- FINAL DIAGNOSTIC ---")
+                    println("Input: [$inputPass]")
+                    println("XML Hash: [$cleanXmlHash]")
+
+                    val isMatch = encoder.matches(inputPass, cleanXmlHash)
+                    println("Is Match: $isMatch")
+
+                    isMatch
+                } else {
+                    false
+                }
+            }
 
             if (foundUser != null) {
                 println("JAAS: Пользователь найден. Роль: ${foundUser.role}")

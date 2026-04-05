@@ -2,12 +2,12 @@
 <users>
     <user>
         <username>client_user</username>
-        <password>password123</password>
+        <password>$2a$10$lqTGe3CalZPkvyPCaK/tqOPlfnROei0UVmNO9rqG6BsaWvAaYI5IW</password>
         <role>AUTHORIZED</role>
     </user>
     <user>
         <username>admin_manager</username>
-        <password>admin_pass</password>
+        <password>$2a$10$jqVutoKa0.ROkh/1PtExE.dLsmnJxvhifS/WNRROZfo3yshhnGoXG</password>
         <role>MANAGER</role>
     </user>
 </users>

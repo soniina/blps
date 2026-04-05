@@ -9,15 +9,14 @@ import itmo.blps.citilink.repositories.CartRepository
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-
-//import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.access.AccessDeniedException // Добавь этот импорт
 
 @Service
 class CartServiceImpl(private val cartRepository: CartRepository, private val cartItemRepository: CartItemRepository) :
     CartService {
 
     override fun getCart(user: User) = cartRepository.findCartByUser(user)
-        ?: throw EntityNotFoundException("Cart for user with session_id ${user.sessionId} not found")
+        ?: throw EntityNotFoundException("Cart for user ${user.username} not found")
 
     override fun getOrCreateCart(user: User) =
         cartRepository.findCartByUser(user) ?: cartRepository.save(Cart(user = user))
@@ -27,7 +26,6 @@ class CartServiceImpl(private val cartRepository: CartRepository, private val ca
     @Transactional
     override fun addCartItem(product: Product, user: User): Cart {
         val cart = getOrCreateCart(user)
-
         val existingItem = cartItemRepository.findByCartAndProduct(cart, product)
 
         if (existingItem != null) {
@@ -44,7 +42,9 @@ class CartServiceImpl(private val cartRepository: CartRepository, private val ca
         val item = cartItemRepository.findCartItemById(itemId)
             ?: throw EntityNotFoundException("Cart item with id $itemId not found")
 
-//        if (item.cart.user.id != user.id) throw AccessDeniedException("Access denied")
+        if (item.cart.user.id != user.id) {
+            throw AccessDeniedException("You cannot remove items from another user's cart")
+        }
 
         val cart = item.cart
         cartItemRepository.delete(item)
@@ -56,9 +56,15 @@ class CartServiceImpl(private val cartRepository: CartRepository, private val ca
         val item = cartItemRepository.findCartItemById(itemId)
             ?: throw EntityNotFoundException("Cart item with id $itemId not found")
 
-//        if (item.cart.user.id != user.id) throw AccessDeniedException("Access denied")
+        // РАСКОММЕНТИРОВАНО: проверка безопасности
+        if (item.cart.user.id != user.id) {
+            throw AccessDeniedException("You cannot update items in another user's cart")
+        }
+
         if (quantity < 1) throw IllegalArgumentException("Quantity must be at least 1")
-        if (quantity > item.product.stockQuantity) throw IllegalStateException("Requested quantity $quantity exceeds stock availability (${item.product.stockQuantity})")
+        if (quantity > item.product.stockQuantity) {
+            throw IllegalStateException("Requested quantity $quantity exceeds stock availability (${item.product.stockQuantity})")
+        }
 
         item.quantity = quantity
         cartItemRepository.save(item)
@@ -70,5 +76,4 @@ class CartServiceImpl(private val cartRepository: CartRepository, private val ca
         val cart = cartRepository.findCartByUser(user) ?: return
         cartItemRepository.deleteAllByCart(cart)
     }
-
 }

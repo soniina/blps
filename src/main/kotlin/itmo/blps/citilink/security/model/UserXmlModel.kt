@@ -12,7 +12,12 @@ data class UsersList(
 )
 
 data class UserXmlModel(
+    @JacksonXmlProperty(localName = "username")
     val username: String = "",
+
+    @JacksonXmlProperty(localName = "password")
     val password: String = "",
+
+    @JacksonXmlProperty(localName = "role")
     val role: String = ""
 )

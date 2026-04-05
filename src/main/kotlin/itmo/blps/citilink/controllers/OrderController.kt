@@ -9,6 +9,7 @@ import itmo.blps.citilink.services.UserService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -21,11 +22,11 @@ class OrderController(
 
     @PostMapping
     fun orderProcess(
-        @CookieValue(value = "session_id") sessionId: String,
+        authentication: Authentication,
         @Valid @RequestBody request: OrderRequest
     ): ResponseEntity<OrderResponse> {
-        val user = userService.getUser(sessionId)
-        val cart = cartService.getCart(user)
+        val user = userService.getOrCreateUser(authentication.name)
+        val cart = cartService.getOrCreateCart(user)
         val cartItems = cartService.getCartItems(cart)
 
         val order = orderService.process(request, user, cartItems)
@@ -34,10 +35,10 @@ class OrderController(
 
     @GetMapping("/{orderId}")
     fun getOrder(
-        @CookieValue(value = "session_id") sessionId: String,
+        authentication: Authentication,
         @PathVariable orderId: Long
     ): ResponseEntity<OrderResponse> {
-        val user = userService.getUser(sessionId)
+        val user = userService.getOrCreateUser(authentication.name)
         val order = orderService.getOrder(orderId, user)
 
         return ResponseEntity.ok(order.toResponse())

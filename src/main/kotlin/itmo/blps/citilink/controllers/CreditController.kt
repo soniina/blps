@@ -11,10 +11,11 @@ import itmo.blps.citilink.services.UserService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
-@Controller
+@RestController
 @RequestMapping("/credit")
 class CreditController(
     private val creditService: CreditService, private val orderService: OrderService,
@@ -23,10 +24,10 @@ class CreditController(
 
     @PostMapping("/applications")
     fun processCredit(
-        @CookieValue(value = "session_id") sessionId: String,
+        authentication: Authentication, // Берем из Security Context
         @Valid @RequestBody request: CreditApplicationRequest
     ): ResponseEntity<CreditApplicationResponse> {
-        val user = userService.getUser(sessionId)
+        val user = userService.getOrCreateUser(authentication.name)
         val order = orderService.getOrder(request.orderId, user)
 
         val application = creditService.process(request, order)
@@ -36,10 +37,10 @@ class CreditController(
 
     @GetMapping("/applications/{applicationId}/offers")
     fun getOffers(
-        @CookieValue("session_id") sessionId: String,
+        authentication: Authentication,
         @PathVariable applicationId: Long
     ): ResponseEntity<List<CreditOfferResponse>> {
-        val user = userService.getUser(sessionId)
+        val user = userService.getOrCreateUser(authentication.name)
         val application = creditService.getCreditApplication(applicationId, user)
 
         val offers = creditOfferService.getCreditOffers(application)
@@ -49,10 +50,10 @@ class CreditController(
 
     @PostMapping("/offers/{offerId}/select")
     fun selectOffer(
-        @CookieValue("session_id") sessionId: String,
+        authentication: Authentication,
         @PathVariable offerId: Long
     ): ResponseEntity<CreditApplicationResponse> {
-        val user = userService.getUser(sessionId)
+        val user = userService.getOrCreateUser(authentication.name)
         val offer = creditOfferService.getCreditOffer(offerId, user)
 
         creditService.selectOffer(offer.application, offer)
@@ -62,10 +63,10 @@ class CreditController(
 
     @PostMapping("/applications/{applicationId}/sign")
     fun signApplication(
-        @CookieValue("session_id") sessionId: String,
+        authentication: Authentication,
         @PathVariable applicationId: Long
     ): ResponseEntity<CreditApplicationResponse> {
-        val user = userService.getUser(sessionId)
+        val user = userService.getOrCreateUser(authentication.name)
         val application = creditService.getCreditApplication(applicationId, user)
 
         creditService.signApplication(application)
