@@ -9,7 +9,7 @@ open class Cart(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    var user: User
+
+    @Column(nullable = false, unique = true)
+    val username: String
 )

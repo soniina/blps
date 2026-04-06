@@ -30,23 +30,21 @@ class SecurityConfig(private val jwtFilter: JwtFilter) {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
-            // Настраиваем Stateless (без сессий в БД/памяти сервера)
-            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) } // зачем
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers("/").permitAll()
-                auth.requestMatchers("/auth/**").permitAll() // Путь для логина
+                auth.requestMatchers("/auth/**").permitAll()
                 auth.requestMatchers("/products/**").permitAll()
-                auth.requestMatchers("/cart/**").permitAll()
 
                 auth.requestMatchers("/operator/**").hasAuthority("MANAGER")
 
+                auth.requestMatchers("/cart/**").hasAuthority("AUTHORIZED")
                 auth.requestMatchers("/checkout/**").hasAuthority("AUTHORIZED")
                 auth.requestMatchers("/orders/**").hasAuthority("AUTHORIZED")
                 auth.requestMatchers("/credit/**").hasAuthority("AUTHORIZED")
 
                 auth.anyRequest().authenticated()
             }
-            // Добавляем наш JWT фильтр перед стандартным фильтром логина
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()

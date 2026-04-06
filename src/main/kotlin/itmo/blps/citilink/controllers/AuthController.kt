@@ -43,4 +43,5 @@ class AuthController(private val jwtProvider: JwtProvider) {
             return ResponseEntity.status(401).body("Неверный логин или пароль")
         }
     }
+    //рега
 }
