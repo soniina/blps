@@ -2,6 +2,7 @@ package itmo.blps.citilink.controllers
 
 import itmo.blps.citilink.dto.requests.LoginRequest
 import itmo.blps.citilink.dto.requests.RegisterRequest
+import itmo.blps.citilink.security.config.JaasConfig
 import itmo.blps.citilink.security.jaas.RolePrincipal
 import itmo.blps.citilink.security.jwt.JwtProvider
 import itmo.blps.citilink.security.model.UserXmlModel
@@ -28,7 +29,7 @@ class AuthController(private val jwtProvider: JwtProvider, private val passwordE
         .addModule(com.fasterxml.jackson.module.kotlin.KotlinModule.Builder().build())
         .build()
 
-    private val xmlFile = File("users.xml")
+    private val xmlFile = File(JaasConfig.USERS_XML_PATH)
 
     @PostMapping("/login")
     fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<Any> {
@@ -53,7 +54,7 @@ class AuthController(private val jwtProvider: JwtProvider, private val passwordE
             return ResponseEntity.ok(mapOf("token" to token))
 
         } catch (e: Exception) {
-            return ResponseEntity.status(401).body("Неверный логин или пароль")
+            return ResponseEntity.status(401).body("Ошибка при авторизации: ${e.message}")
         }
     }
 

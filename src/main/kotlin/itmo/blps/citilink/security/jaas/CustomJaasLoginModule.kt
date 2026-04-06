@@ -2,15 +2,16 @@ package itmo.blps.citilink.security.jaas
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import itmo.blps.citilink.security.config.JaasConfig
 import itmo.blps.citilink.security.model.UsersList
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.io.File
 import javax.security.auth.Subject
+import javax.security.auth.callback.Callback
 import javax.security.auth.callback.CallbackHandler
 import javax.security.auth.callback.NameCallback
 import javax.security.auth.callback.PasswordCallback
 import javax.security.auth.spi.LoginModule
-import javax.security.auth.callback.Callback
 
 class CustomJaasLoginModule : LoginModule {
     private var role: String? = null
@@ -24,7 +25,12 @@ class CustomJaasLoginModule : LoginModule {
         .build()
     private val encoder = BCryptPasswordEncoder()
 
-    override fun initialize(subject: Subject, callbackHandler: CallbackHandler, sharedState: Map<String, *>, options: Map<String, *>) {
+    override fun initialize(
+        subject: Subject,
+        callbackHandler: CallbackHandler,
+        sharedState: Map<String, *>,
+        options: Map<String, *>
+    ) {
         this.subject = subject
         this.callbackHandler = callbackHandler
     }
@@ -42,7 +48,7 @@ class CustomJaasLoginModule : LoginModule {
         println("JAAS: Попытка входа пользователя: $inputUser")
 
         try {
-            val xmlFile = File("users.xml")
+            val xmlFile = File(JaasConfig.USERS_XML_PATH)
 
             if (!xmlFile.exists()) {
                 println("JAAS ОШИБКА: Файл ${xmlFile.absolutePath} не найден!")
