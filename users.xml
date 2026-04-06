@@ -6,8 +6,8 @@
         <role>AUTHORIZED</role>
     </user>
     <user>
-        <username>admin_manager</username>
+        <username>admin_operator</username>
         <password>$2a$10$jqVutoKa0.ROkh/1PtExE.dLsmnJxvhifS/WNRROZfo3yshhnGoXG</password>
-        <role>MANAGER</role>
+        <role>OPERATOR</role>
     </user>
 </users>

@@ -16,13 +16,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(private val jwtFilter: JwtFilter) {
+
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder()
     }
+
     @Bean
-    fun userDetailsService(): org.springframework.security.core.userdetails.UserDetailsService {
-        // Надо возвратить пустой менеджер, чтобы Спринг не генерировал случайный пароль
+    fun userDetailsService(): UserDetailsService {
         return InMemoryUserDetailsManager()
     }
 
@@ -30,13 +31,13 @@ class SecurityConfig(private val jwtFilter: JwtFilter) {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
-            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) } // зачем
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers("/").permitAll()
                 auth.requestMatchers("/auth/**").permitAll()
                 auth.requestMatchers("/products/**").permitAll()
 
-                auth.requestMatchers("/operator/**").hasAuthority("MANAGER")
+                auth.requestMatchers("/operator/**").hasAuthority("OPERATOR")
 
                 auth.requestMatchers("/cart/**").hasAuthority("AUTHORIZED")
                 auth.requestMatchers("/checkout/**").hasAuthority("AUTHORIZED")
