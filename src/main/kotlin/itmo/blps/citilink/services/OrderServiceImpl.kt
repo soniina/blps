@@ -7,8 +7,7 @@ import itmo.blps.citilink.repositories.OrderRepository
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-
-//import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.access.AccessDeniedException
 
 @Service
 class OrderServiceImpl(
@@ -16,17 +15,17 @@ class OrderServiceImpl(
     private val productService: ProductService, private val cartService: CartService
 ) : OrderService {
 
-    override fun getOrder(orderId: Long, user: User): Order {
+    override fun getOrder(orderId: Long, username: String): Order {
         val order =
             orderRepository.findOrderById(orderId) ?: throw EntityNotFoundException("Order with id $orderId not found")
 
-//        if (order.user.id != user.id) throw AccessDeniedException("Access denied")
+        if (order.username != username) throw AccessDeniedException("You cannot access orders of another user")
 
         return order
     }
 
     @Transactional
-    override fun process(request: OrderRequest, user: User, items: List<CartItem>): Order {
+    override fun process(request: OrderRequest, username: String, items: List<CartItem>): Order {
         if (items.isEmpty()) throw IllegalStateException("Cannot place order with empty cart")
 
         val itemsPrice = items.sumOf { it.product.price * it.quantity }
@@ -34,7 +33,7 @@ class OrderServiceImpl(
 
         val order = orderRepository.save(
             Order(
-                user = user,
+                username = username,
                 recipientName = request.name!!,
                 recipientSurname = request.surname!!,
                 recipientPhone = request.phone!!,
@@ -59,7 +58,7 @@ class OrderServiceImpl(
             )
         }
 
-        cartService.clearCart(user)
+        cartService.clearCart(username)
         return order
     }
 

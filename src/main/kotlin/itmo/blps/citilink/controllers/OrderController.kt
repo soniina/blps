@@ -5,7 +5,6 @@ import itmo.blps.citilink.dto.responses.OrderResponse
 import itmo.blps.citilink.dto.responses.toResponse
 import itmo.blps.citilink.services.CartService
 import itmo.blps.citilink.services.OrderService
-import itmo.blps.citilink.services.UserService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/orders")
 class OrderController(
-    private val userService: UserService,
     private val cartService: CartService,
     private val orderService: OrderService
 ) {
@@ -25,11 +23,11 @@ class OrderController(
         authentication: Authentication,
         @Valid @RequestBody request: OrderRequest
     ): ResponseEntity<OrderResponse> {
-        val user = userService.getOrCreateUser(authentication.name)
-        val cart = cartService.getOrCreateCart(user)
+        val username = authentication.name
+        val cart = cartService.getCart(username)
         val cartItems = cartService.getCartItems(cart)
 
-        val order = orderService.process(request, user, cartItems)
+        val order = orderService.process(request, username, cartItems)
         return ResponseEntity.status(HttpStatus.CREATED).body(order.toResponse())
     }
 
@@ -38,8 +36,8 @@ class OrderController(
         authentication: Authentication,
         @PathVariable orderId: Long
     ): ResponseEntity<OrderResponse> {
-        val user = userService.getOrCreateUser(authentication.name)
-        val order = orderService.getOrder(orderId, user)
+        val username = authentication.name
+        val order = orderService.getOrder(orderId, username)
 
         return ResponseEntity.ok(order.toResponse())
     }
