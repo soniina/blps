@@ -5,22 +5,20 @@ import itmo.blps.citilink.models.*
 import itmo.blps.citilink.repositories.CreditApplicationRepository
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
-
-//import org.springframework.security.access.AccessDeniedException
 
 @Service
 class CreditServiceImpl(
     private val creditApplicationRepository: CreditApplicationRepository,
-    private val bankService: BankService,
-    private val userService: UserService
+    private val bankService: BankService
 ) : CreditService {
 
-    override fun getCreditApplication(applicationId: Long, user: User): CreditApplication {
+    override fun getCreditApplication(applicationId: Long, username: String): CreditApplication {
         val application = creditApplicationRepository.findCreditApplicationsById(applicationId)
             ?: throw EntityNotFoundException("CreditApplication with id $applicationId not found")
 
-//        if (application.order.user.id != user.id) throw AccessDeniedException("Access denied")
+        if (application.order.username != username) throw AccessDeniedException("You cannot access orders of another user")
 
         return application
     }
@@ -50,9 +48,6 @@ class CreditServiceImpl(
     override fun approveOfflineSigning(applicationId: Long): CreditApplication {
         val application = creditApplicationRepository.findById(applicationId)
             .orElseThrow { EntityNotFoundException("CreditApplication with id $applicationId not found") }
-        // заменить на getCreditApplication, передавая оператора (User, user.role = Operator)
-        // val application = getCreditApplication(applicationId, user)
-        // if (user.role != OPERATOR) throw AccessDeniedException("Access denied")
 
         application.status = ApplicationStatus.SIGNED
         application.order.status = OrderStatus.PROCESSING

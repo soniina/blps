@@ -5,7 +5,7 @@ import itmo.blps.citilink.models.*
 import jakarta.transaction.Transactional
 
 interface CreditService {
-    fun getCreditApplication(applicationId: Long, user: User): CreditApplication
+    fun getCreditApplication(applicationId: Long, username: String): CreditApplication
     fun process(request: CreditApplicationRequest, order: Order): CreditApplication
     fun getApplicationsForOperator(): List<CreditApplication>
 
