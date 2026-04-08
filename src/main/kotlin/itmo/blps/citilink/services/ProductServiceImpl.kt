@@ -9,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ProductServiceImpl(private val productRepository: ProductRepository) : ProductService {
 
+    @Transactional(readOnly = true)
     override fun getProductsOfDay() = productRepository.findProductsByIsProductOfDayIsTrue()
 
+    @Transactional(readOnly = true)
     override fun getProductById(productId: Long): Product = productRepository.findProductById(productId)
         ?: throw EntityNotFoundException("Product with id $productId not found")
 

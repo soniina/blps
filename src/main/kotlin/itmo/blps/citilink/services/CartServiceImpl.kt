@@ -14,12 +14,15 @@ import org.springframework.transaction.annotation.Transactional
 class CartServiceImpl(private val cartRepository: CartRepository, private val cartItemRepository: CartItemRepository) :
     CartService {
 
+    @Transactional(readOnly = true)
     override fun getCart(username: String) = cartRepository.findCartByUsername(username)
         ?: throw EntityNotFoundException("Cart for user ${username} not found")
 
+    @Transactional
     override fun getOrCreateCart(username: String) =
         cartRepository.findCartByUsername(username) ?: cartRepository.save(Cart(username = username))
 
+    @Transactional(readOnly = true)
     override fun getCartItems(cart: Cart): List<CartItem> = cartItemRepository.findAllByCartOrderByIdAsc(cart)
 
     @Transactional
@@ -68,7 +71,8 @@ class CartServiceImpl(private val cartRepository: CartRepository, private val ca
 
     @Transactional
     override fun clearCart(username: String) {
-        val cart = cartRepository.findCartByUsername(username) ?: return
+        val cart = cartRepository.findCartByUsername(username)
+            ?: throw EntityNotFoundException("Cart for user $username not found")
         cartItemRepository.deleteAllByCart(cart)
     }
 }

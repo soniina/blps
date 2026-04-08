@@ -4,9 +4,9 @@ import itmo.blps.citilink.dto.requests.CreditApplicationRequest
 import itmo.blps.citilink.models.*
 import itmo.blps.citilink.repositories.CreditApplicationRepository
 import jakarta.persistence.EntityNotFoundException
-import jakarta.transaction.Transactional
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CreditServiceImpl(
@@ -14,6 +14,7 @@ class CreditServiceImpl(
     private val bankService: BankService
 ) : CreditService {
 
+    @Transactional(readOnly = true)
     override fun getCreditApplication(applicationId: Long, username: String): CreditApplication {
         val application = creditApplicationRepository.findCreditApplicationsById(applicationId)
             ?: throw EntityNotFoundException("CreditApplication with id $applicationId not found")
@@ -23,23 +24,24 @@ class CreditServiceImpl(
         return application
     }
 
+    @Transactional
     override fun process(request: CreditApplicationRequest, order: Order): CreditApplication {
         val application = creditApplicationRepository.save(
             CreditApplication(
                 order = order,
-                termMonths = request.termMonths!!,
-                initialPayment = request.initialPayment!!,
-                passportSeries = request.passportSeries!!,
-                passportNumber = request.passportNumber!!,
-                email = request.email!!,
-                phone = request.phone!!
+                termMonths = request.termMonths,
+                initialPayment = request.initialPayment,
+                passportSeries = request.passportSeries,
+                passportNumber = request.passportNumber,
+                email = request.email,
+                phone = request.phone
             )
         )
         bankService.generateOffers(application)
         return application
     }
 
-
+    @Transactional(readOnly = true)
     override fun getApplicationsForOperator(): List<CreditApplication> {
         return creditApplicationRepository.findAllByStatus(ApplicationStatus.WAITING_FOR_OPERATOR)
     }
@@ -54,6 +56,7 @@ class CreditServiceImpl(
         return creditApplicationRepository.save(application)
     }
 
+    @Transactional
     override fun updateStatus(creditApplication: CreditApplication, status: ApplicationStatus) {
         creditApplication.status = status
         creditApplicationRepository.save(creditApplication)

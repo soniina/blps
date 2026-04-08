@@ -10,11 +10,9 @@ interface CartService {
     fun getOrCreateCart(username: String): Cart
     fun getCartItems(cart: Cart): List<CartItem>
 
-    @Transactional
     fun addCartItem(product: Product, username: String): Cart
     fun removeCartItem(itemId: Long, username: String): Cart
     fun updateQuantity(itemId: Long, quantity: Int, username: String): Cart
 
-    @Transactional
     fun clearCart(username: String)
 }

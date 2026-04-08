@@ -15,6 +15,7 @@ class OrderServiceImpl(
     private val productService: ProductService, private val cartService: CartService
 ) : OrderService {
 
+    @Transactional(readOnly = true)
     override fun getOrder(orderId: Long, username: String): Order {
         val order =
             orderRepository.findOrderById(orderId) ?: throw EntityNotFoundException("Order with id $orderId not found")

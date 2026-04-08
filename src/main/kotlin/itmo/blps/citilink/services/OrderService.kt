@@ -8,6 +8,5 @@ import org.springframework.transaction.annotation.Transactional
 interface OrderService {
     fun getOrder(orderId: Long, username: String): Order
 
-    @Transactional
     fun process(request: OrderRequest, username: String, items: List<CartItem>): Order
 }
