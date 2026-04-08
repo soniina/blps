@@ -1,5 +1,7 @@
 package itmo.blps.citilink.controllers
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import itmo.blps.citilink.dto.responses.CartResponse
 import itmo.blps.citilink.dto.responses.toResponse
 import itmo.blps.citilink.services.CartService
@@ -9,6 +11,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
+@Tag(name = "Корзина", description = "Управление товарами в корзине пользователя")
 @RestController
 @RequestMapping("/cart")
 class CartController(
@@ -16,6 +19,7 @@ class CartController(
     private val productService: ProductService
 ) {
 
+    @Operation(summary = "Получить корзину", description = "Возвращает текущий состав корзины авторизованного пользователя")
     @GetMapping
     fun getCart(authentication: Authentication): ResponseEntity<CartResponse> {
         val username = authentication.name
@@ -25,6 +29,7 @@ class CartController(
         return ResponseEntity.ok(cart.toResponse(items))
     }
 
+    @Operation(summary = "Добавить товар", description = "Добавляет товар в корзину по его ID")
     @PostMapping("/items")
     fun addCartItem(
         authentication: Authentication,
@@ -39,6 +44,7 @@ class CartController(
         return ResponseEntity.status(HttpStatus.CREATED).body(cart.toResponse(items))
     }
 
+    @Operation(summary = "Удалить товар", description = "Удаляет позицию из корзины по её ID")
     @DeleteMapping("/items/{itemId}")
     fun removeCartItem(
         authentication: Authentication,
@@ -52,6 +58,7 @@ class CartController(
         return ResponseEntity.ok(cart.toResponse(items))
     }
 
+    @Operation(summary = "Изменить количество", description = "Обновляет количество товара в корзине")
     @PatchMapping("/items/{itemId}")
     fun updateCartItem(
         authentication: Authentication,

@@ -1,5 +1,7 @@
 package itmo.blps.citilink.controllers
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import itmo.blps.citilink.dto.requests.OrderRequest
 import itmo.blps.citilink.dto.responses.OrderResponse
 import itmo.blps.citilink.dto.responses.toResponse
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
+@Tag(name = "Заказы", description = "Оформление и просмотр заказов")
 @RestController
 @RequestMapping("/orders")
 class OrderController(
@@ -18,6 +21,7 @@ class OrderController(
     private val orderService: OrderService
 ) {
 
+    @Operation(summary = "Оформить заказ", description = "Преобразует корзину пользователя в оформленный заказ")
     @PostMapping
     fun orderProcess(
         authentication: Authentication,
@@ -31,6 +35,7 @@ class OrderController(
         return ResponseEntity.status(HttpStatus.CREATED).body(order.toResponse())
     }
 
+    @Operation(summary = "Детали заказа", description = "Возвращает информацию о конкретном заказе по ID")
     @GetMapping("/{orderId}")
     fun getOrder(
         authentication: Authentication,

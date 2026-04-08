@@ -1,4 +1,4 @@
-package itmo.blps.citilink.security.config
+package itmo.blps.citilink.configs
 
 import itmo.blps.citilink.security.jwt.JwtFilter
 import org.springframework.context.annotation.Bean
@@ -34,6 +34,8 @@ class SecurityConfig(private val jwtFilter: JwtFilter) {
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers("/").permitAll()
+                auth.requestMatchers("/v3/**").permitAll()
+                auth.requestMatchers("/swagger-ui/**").permitAll()
                 auth.requestMatchers("/auth/**").permitAll()
                 auth.requestMatchers("/products/**").permitAll()
 

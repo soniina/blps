@@ -1,8 +1,10 @@
 package itmo.blps.citilink.controllers
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import itmo.blps.citilink.dto.requests.LoginRequest
 import itmo.blps.citilink.dto.requests.RegisterRequest
-import itmo.blps.citilink.security.config.JaasConfig
+import itmo.blps.citilink.configs.JaasConfig
 import itmo.blps.citilink.security.jaas.RolePrincipal
 import itmo.blps.citilink.security.jwt.JwtProvider
 import itmo.blps.citilink.security.model.UserXmlModel
@@ -20,7 +22,7 @@ import javax.security.auth.callback.NameCallback
 import javax.security.auth.callback.PasswordCallback
 import javax.security.auth.login.LoginContext
 
-
+@Tag(name = "Авторизация", description = "Регистрация и вход в систему")
 @RestController
 @RequestMapping("/auth")
 class AuthController(private val jwtProvider: JwtProvider, private val passwordEncoder: PasswordEncoder) {
@@ -31,6 +33,7 @@ class AuthController(private val jwtProvider: JwtProvider, private val passwordE
 
     private val xmlFile = File(JaasConfig.USERS_XML_PATH)
 
+    @Operation(summary = "Вход в систему", description = "Проверяет учетные данные через JAAS и возвращает JWT токен")
     @PostMapping("/login")
     fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<Any> {
         try {
@@ -58,6 +61,7 @@ class AuthController(private val jwtProvider: JwtProvider, private val passwordE
         }
     }
 
+    @Operation(summary = "Регистрация", description = "Создает нового пользователя и сохраняет его в XML файл")
     @PostMapping("/register")
     fun register(@Valid @RequestBody request: RegisterRequest): ResponseEntity<Any> {
         try {
@@ -68,7 +72,7 @@ class AuthController(private val jwtProvider: JwtProvider, private val passwordE
             }
 
             if (usersList.users.any { it.username == request.username }) {
-                return ResponseEntity.badRequest().body("Пользователь уже существует")
+                return ResponseEntity.badRequest().body("Пользователь с таким именем уже существует")
             }
 
             val newUser = UserXmlModel(
@@ -86,5 +90,4 @@ class AuthController(private val jwtProvider: JwtProvider, private val passwordE
             return ResponseEntity.internalServerError().body("Ошибка при регистрации: ${e.message}")
         }
     }
-
 }

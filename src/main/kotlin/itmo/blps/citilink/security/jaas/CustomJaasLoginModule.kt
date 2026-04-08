@@ -2,7 +2,7 @@ package itmo.blps.citilink.security.jaas
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import itmo.blps.citilink.security.config.JaasConfig
+import itmo.blps.citilink.configs.JaasConfig
 import itmo.blps.citilink.security.model.UsersList
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.io.File

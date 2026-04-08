@@ -1,5 +1,7 @@
 package itmo.blps.citilink.controllers
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import itmo.blps.citilink.dto.requests.CreditApplicationRequest
 import itmo.blps.citilink.dto.responses.CreditApplicationResponse
 import itmo.blps.citilink.dto.responses.CreditOfferResponse
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
+@Tag(name = "Кредитование", description = "Оформление кредитных заявок и выбор предложений")
 @RestController
 @RequestMapping("/credit")
 class CreditController(
@@ -20,6 +23,7 @@ class CreditController(
     private val creditOfferService: CreditOfferService
 ) {
 
+    @Operation(summary = "Создать заявку на кредит", description = "Оформляет заявку на основе существующего заказа")
     @PostMapping("/applications")
     fun processCredit(
         authentication: Authentication,
@@ -33,6 +37,7 @@ class CreditController(
         return ResponseEntity.status(HttpStatus.CREATED).body(application.toResponse())
     }
 
+    @Operation(summary = "Список предложений", description = "Возвращает доступные предложения банков по конкретной заявке")
     @GetMapping("/applications/{applicationId}/offers")
     fun getOffers(
         authentication: Authentication,
@@ -45,7 +50,7 @@ class CreditController(
         return ResponseEntity.ok(offers.map { it.toResponse() })
     }
 
-
+    @Operation(summary = "Выбрать предложение", description = "Фиксация выбора конкретного банковского предложения")
     @PostMapping("/offers/{offerId}/select")
     fun selectOffer(
         authentication: Authentication,
@@ -59,6 +64,7 @@ class CreditController(
         return ResponseEntity.ok(offer.application.toResponse())
     }
 
+    @Operation(summary = "Подписать заявку", description = "Онлайн подписание кредитного договора пользователем")
     @PostMapping("/applications/{applicationId}/sign")
     fun signApplication(
         authentication: Authentication,
