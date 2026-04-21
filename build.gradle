@@ -1,14 +1,15 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '2.2.21'
     id 'org.jetbrains.kotlin.plugin.spring' version '2.2.21'
-    id 'org.springframework.boot' version '3.2.5' // Рекомендую 3.x версию для стабильности с WildFly
+    id 'org.springframework.boot' version '3.3.0'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.jetbrains.kotlin.plugin.jpa' version '2.2.21'
-    id 'war' // Добавлено для WildFly
+    id 'war'
 }
 
 group = 'itmo.blps'
 version = '0.0.1-SNAPSHOT'
+description = 'citilink'
 
 java {
     toolchain {
@@ -20,18 +21,9 @@ repositories {
     mavenCentral()
 }
 
-//configurations {
-//    all {
-//        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-//    }
-//}
-
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 
-    // Безопасность
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
@@ -39,15 +31,27 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
 
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
-    // Очереди
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+
     implementation 'org.springframework.boot:spring-boot-starter-activemq'
     implementation 'org.webjars:stomp-websocket:2.3.4'
 
+
     runtimeOnly 'org.postgresql:postgresql'
+
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 kotlin {
@@ -66,6 +70,11 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+
 bootWar {
     archiveFileName = 'citilink.war'
+}
+
+bootJar {
+    enabled = false
 }

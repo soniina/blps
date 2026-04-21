@@ -2,7 +2,6 @@
 <jboss-deployment-structure>
     <deployment>
         <exclude-subsystems>
-            <!-- отключаем подсистемы сервера, которые конфликтуют со Spring Boot -->
             <subsystem name="logging"/>
             <subsystem name="jpa"/>
         </exclude-subsystems>

@@ -41,4 +41,6 @@ out/
 ### Kotlin ###
 .kotlin
 cookies.txt
+*.http
+users.xml
 

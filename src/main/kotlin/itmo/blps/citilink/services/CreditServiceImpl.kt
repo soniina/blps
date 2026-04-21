@@ -4,44 +4,44 @@ import itmo.blps.citilink.dto.requests.CreditApplicationRequest
 import itmo.blps.citilink.models.*
 import itmo.blps.citilink.repositories.CreditApplicationRepository
 import jakarta.persistence.EntityNotFoundException
-import jakarta.transaction.Transactional
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
-
-//import org.springframework.security.access.AccessDeniedException
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CreditServiceImpl(
     private val creditApplicationRepository: CreditApplicationRepository,
-    private val bankService: BankService,
-    private val userService: UserService
+    private val bankService: BankService
 ) : CreditService {
 
-    override fun getCreditApplication(applicationId: Long, user: User): CreditApplication {
+    @Transactional(readOnly = true)
+    override fun getCreditApplication(applicationId: Long, username: String): CreditApplication {
         val application = creditApplicationRepository.findCreditApplicationsById(applicationId)
             ?: throw EntityNotFoundException("CreditApplication with id $applicationId not found")
 
-//        if (application.order.user.id != user.id) throw AccessDeniedException("Access denied")
+        if (application.order.username != username) throw AccessDeniedException("You cannot access orders of another user")
 
         return application
     }
 
+    @Transactional
     override fun process(request: CreditApplicationRequest, order: Order): CreditApplication {
         val application = creditApplicationRepository.save(
             CreditApplication(
                 order = order,
-                termMonths = request.termMonths!!,
-                initialPayment = request.initialPayment!!,
-                passportSeries = request.passportSeries!!,
-                passportNumber = request.passportNumber!!,
-                email = request.email!!,
-                phone = request.phone!!
+                termMonths = request.termMonths,
+                initialPayment = request.initialPayment,
+                passportSeries = request.passportSeries,
+                passportNumber = request.passportNumber,
+                email = request.email,
+                phone = request.phone
             )
         )
         bankService.generateOffers(application)
         return application
     }
 
-
+    @Transactional(readOnly = true)
     override fun getApplicationsForOperator(): List<CreditApplication> {
         return creditApplicationRepository.findAllByStatus(ApplicationStatus.WAITING_FOR_OPERATOR)
     }
@@ -50,15 +50,13 @@ class CreditServiceImpl(
     override fun approveOfflineSigning(applicationId: Long): CreditApplication {
         val application = creditApplicationRepository.findById(applicationId)
             .orElseThrow { EntityNotFoundException("CreditApplication with id $applicationId not found") }
-        // заменить на getCreditApplication, передавая оператора (User, user.role = Operator)
-        // val application = getCreditApplication(applicationId, user)
-        // if (user.role != OPERATOR) throw AccessDeniedException("Access denied")
 
         application.status = ApplicationStatus.SIGNED
         application.order.status = OrderStatus.PROCESSING
         return creditApplicationRepository.save(application)
     }
 
+    @Transactional
     override fun updateStatus(creditApplication: CreditApplication, status: ApplicationStatus) {
         creditApplication.status = status
         creditApplicationRepository.save(creditApplication)

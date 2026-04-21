@@ -9,7 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.time.LocalDateTime
-//import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.access.AccessDeniedException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -24,21 +24,16 @@ class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid request", request)
     }
 
-//    @ExceptionHandler(AccessDeniedException::class)
-//    fun handleAccessDenied(ex: AccessDeniedException, request: HttpServletRequest): ResponseEntity<ErrorResponse> {
-//        return buildResponse(HttpStatus.FORBIDDEN, ex.message ?: "Access denied", request)
-//    }
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleAccessDenied(ex: AccessDeniedException, request: HttpServletRequest): ResponseEntity<ErrorResponse> {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.message ?: "Access denied", request)
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidationError(ex: MethodArgumentNotValidException, request: HttpServletRequest): ResponseEntity<ErrorResponse> {
         val errors = ex.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" }.joinToString("; ")
         return buildResponse(HttpStatus.BAD_REQUEST, "Validation failed: $errors", request)
     }
-
-//    @ExceptionHandler(UnauthorizedException::class)
-//    fun handleUnauthorized(ex: UnauthorizedException, request: HttpServletRequest): ResponseEntity<ErrorResponse> {
-//        return buildResponse(HttpStatus.UNAUTHORIZED, ex.message ?: "Full authentication is required", request)
-//    }
 
     @ExceptionHandler(Exception::class)
     fun handleGlobalError(ex: Exception, request: HttpServletRequest): ResponseEntity<ErrorResponse> {

@@ -1,4 +1,4 @@
-package itmo.blps.citilink.security.config
+package itmo.blps.citilink.configs
 
 import itmo.blps.citilink.security.jwt.JwtFilter
 import org.springframework.context.annotation.Bean
@@ -16,13 +16,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(private val jwtFilter: JwtFilter) {
+
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder()
     }
+
     @Bean
-    fun userDetailsService(): org.springframework.security.core.userdetails.UserDetailsService {
-        // Надо возвратить пустой менеджер, чтобы Спринг не генерировал случайный пароль
+    fun userDetailsService(): UserDetailsService {
         return InMemoryUserDetailsManager()
     }
 
@@ -30,23 +31,23 @@ class SecurityConfig(private val jwtFilter: JwtFilter) {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
-            // Настраиваем Stateless (без сессий в БД/памяти сервера)
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth.requestMatchers("/").permitAll()
-                auth.requestMatchers("/auth/**").permitAll() // Путь для логина
+                auth.requestMatchers("/v3/**").permitAll()
+                auth.requestMatchers("/swagger-ui/**").permitAll()
+                auth.requestMatchers("/auth/**").permitAll()
                 auth.requestMatchers("/products/**").permitAll()
-                auth.requestMatchers("/cart/**").permitAll()
 
-                auth.requestMatchers("/operator/**").hasAuthority("MANAGER")
+                auth.requestMatchers("/operator/**").hasAuthority("OPERATOR")
 
+                auth.requestMatchers("/cart/**").hasAuthority("AUTHORIZED")
                 auth.requestMatchers("/checkout/**").hasAuthority("AUTHORIZED")
                 auth.requestMatchers("/orders/**").hasAuthority("AUTHORIZED")
                 auth.requestMatchers("/credit/**").hasAuthority("AUTHORIZED")
 
                 auth.anyRequest().authenticated()
             }
-            // Добавляем наш JWT фильтр перед стандартным фильтром логина
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()

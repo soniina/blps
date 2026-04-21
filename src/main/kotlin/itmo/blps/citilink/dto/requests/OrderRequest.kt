@@ -8,14 +8,14 @@ import jakarta.validation.constraints.Pattern
 
 data class OrderRequest(
     @field:NotBlank(message = "Имя обязательно")
-    val name: String? = null,
+    val name: String,
 
     @field:NotBlank(message = "Фамилия обязательна")
-    val surname: String? = null,
+    val surname: String,
 
     @field:NotBlank(message = "Телефон обязателен")
     @field:Pattern(regexp = "^(\\+7|8)[0-9]{10}$", message = "Неверный формат телефона")
-    val phone: String? = null,
+    val phone: String,
 
     val receiptMethod: ReceiptMethod = ReceiptMethod.PICKUP,
 

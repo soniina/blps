@@ -19,11 +19,9 @@ class JwtFilter(private val jwtProvider: JwtProvider) : OncePerRequestFilter() {
             val username = jwtProvider.getUsernameFromToken(token)
             val role = jwtProvider.getRoleFromToken(token)
 
-            // Создаем объект авторизации для Spring Security, роль из токена
             val authority = SimpleGrantedAuthority(role)
             val auth = UsernamePasswordAuthenticationToken(username, null, listOf(authority))
 
-            // Устанавливаем пользователя в контекст безопасности
             SecurityContextHolder.getContext().authentication = auth
         }
 

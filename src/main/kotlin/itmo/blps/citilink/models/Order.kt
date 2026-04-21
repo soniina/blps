@@ -31,9 +31,8 @@ open class Order(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    var user: User,
+    @Column(nullable = false, unique = true)
+    val username: String,
 
     @Column(nullable = false)
     var recipientName: String,

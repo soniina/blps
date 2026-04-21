@@ -8,16 +8,16 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
 data class UsersList(
     @JacksonXmlProperty(localName = "user")
     @JacksonXmlElementWrapper(useWrapping = false)
-    val users: List<UserXmlModel> = mutableListOf()
+    val users: MutableList<UserXmlModel> = mutableListOf(),
 )
 
 data class UserXmlModel(
     @JacksonXmlProperty(localName = "username")
-    val username: String = "",
+    val username: String,
 
     @JacksonXmlProperty(localName = "password")
-    val password: String = "",
+    val password: String,
 
     @JacksonXmlProperty(localName = "role")
-    val role: String = ""
+    val role: String
 )

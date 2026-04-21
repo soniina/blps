@@ -3,29 +3,31 @@ package itmo.blps.citilink.services
 import itmo.blps.citilink.models.Cart
 import itmo.blps.citilink.models.CartItem
 import itmo.blps.citilink.models.Product
-import itmo.blps.citilink.models.User
 import itmo.blps.citilink.repositories.CartItemRepository
 import itmo.blps.citilink.repositories.CartRepository
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.security.access.AccessDeniedException // Добавь этот импорт
 
 @Service
 class CartServiceImpl(private val cartRepository: CartRepository, private val cartItemRepository: CartItemRepository) :
     CartService {
 
-    override fun getCart(user: User) = cartRepository.findCartByUser(user)
-        ?: throw EntityNotFoundException("Cart for user ${user.username} not found")
+    @Transactional(readOnly = true)
+    override fun getCart(username: String) = cartRepository.findCartByUsername(username)
+        ?: throw EntityNotFoundException("Cart for user ${username} not found")
 
-    override fun getOrCreateCart(user: User) =
-        cartRepository.findCartByUser(user) ?: cartRepository.save(Cart(user = user))
+    @Transactional
+    override fun getOrCreateCart(username: String) =
+        cartRepository.findCartByUsername(username) ?: cartRepository.save(Cart(username = username))
 
+    @Transactional(readOnly = true)
     override fun getCartItems(cart: Cart): List<CartItem> = cartItemRepository.findAllByCartOrderByIdAsc(cart)
 
     @Transactional
-    override fun addCartItem(product: Product, user: User): Cart {
-        val cart = getOrCreateCart(user)
+    override fun addCartItem(product: Product, username: String): Cart {
+        val cart = getOrCreateCart(username)
         val existingItem = cartItemRepository.findByCartAndProduct(cart, product)
 
         if (existingItem != null) {
@@ -38,13 +40,11 @@ class CartServiceImpl(private val cartRepository: CartRepository, private val ca
     }
 
     @Transactional
-    override fun removeCartItem(itemId: Long, user: User): Cart {
+    override fun removeCartItem(itemId: Long, username: String): Cart {
         val item = cartItemRepository.findCartItemById(itemId)
             ?: throw EntityNotFoundException("Cart item with id $itemId not found")
 
-        if (item.cart.user.id != user.id) {
-            throw AccessDeniedException("You cannot remove items from another user's cart")
-        }
+        if (item.cart.username != username) throw AccessDeniedException("You cannot remove items from another user's cart")
 
         val cart = item.cart
         cartItemRepository.delete(item)
@@ -52,14 +52,12 @@ class CartServiceImpl(private val cartRepository: CartRepository, private val ca
     }
 
     @Transactional
-    override fun updateQuantity(itemId: Long, quantity: Int, user: User): Cart {
+    override fun updateQuantity(itemId: Long, quantity: Int, username: String): Cart {
         val item = cartItemRepository.findCartItemById(itemId)
             ?: throw EntityNotFoundException("Cart item with id $itemId not found")
 
-        // РАСКОММЕНТИРОВАНО: проверка безопасности
-        if (item.cart.user.id != user.id) {
+        if (item.cart.username != username)
             throw AccessDeniedException("You cannot update items in another user's cart")
-        }
 
         if (quantity < 1) throw IllegalArgumentException("Quantity must be at least 1")
         if (quantity > item.product.stockQuantity) {
@@ -72,8 +70,9 @@ class CartServiceImpl(private val cartRepository: CartRepository, private val ca
     }
 
     @Transactional
-    override fun clearCart(user: User) {
-        val cart = cartRepository.findCartByUser(user) ?: return
+    override fun clearCart(username: String) {
+        val cart = cartRepository.findCartByUsername(username)
+            ?: throw EntityNotFoundException("Cart for user $username not found")
         cartItemRepository.deleteAllByCart(cart)
     }
 }
