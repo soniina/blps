@@ -31,7 +31,7 @@ open class Order(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     val username: String,
 
     @Column(nullable = false)

@@ -6,10 +6,12 @@ import itmo.blps.citilink.models.Product
 import itmo.blps.citilink.repositories.CartItemRepository
 import itmo.blps.citilink.repositories.CartRepository
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.context.annotation.Profile
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+@Profile("shop")
 @Service
 class CartServiceImpl(private val cartRepository: CartRepository, private val cartItemRepository: CartItemRepository) :
     CartService {

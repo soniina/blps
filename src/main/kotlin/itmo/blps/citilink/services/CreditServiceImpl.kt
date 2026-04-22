@@ -4,14 +4,15 @@ import itmo.blps.citilink.dto.requests.CreditApplicationRequest
 import itmo.blps.citilink.models.*
 import itmo.blps.citilink.repositories.CreditApplicationRepository
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.context.annotation.Profile
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+@Profile("shop")
 @Service
 class CreditServiceImpl(
-    private val creditApplicationRepository: CreditApplicationRepository,
-    private val bankService: BankService
+    private val creditApplicationRepository: CreditApplicationRepository
 ) : CreditService {
 
     @Transactional(readOnly = true)
@@ -37,7 +38,8 @@ class CreditServiceImpl(
                 phone = request.phone
             )
         )
-        bankService.generateOffers(application)
+        application.status = ApplicationStatus.WAITING_FOR_BANKS
+//        bankService.generateOffers(application)
         return application
     }
 

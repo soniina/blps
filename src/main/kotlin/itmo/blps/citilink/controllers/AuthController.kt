@@ -10,6 +10,7 @@ import itmo.blps.citilink.security.jwt.JwtProvider
 import itmo.blps.citilink.security.model.UserXmlModel
 import itmo.blps.citilink.security.model.UsersList
 import jakarta.validation.Valid
+import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.PostMapping
@@ -23,6 +24,7 @@ import javax.security.auth.callback.PasswordCallback
 import javax.security.auth.login.LoginContext
 
 @Tag(name = "Авторизация", description = "Регистрация и вход в систему")
+@Profile("shop")
 @RestController
 @RequestMapping("/auth")
 class AuthController(private val jwtProvider: JwtProvider, private val passwordEncoder: PasswordEncoder) {

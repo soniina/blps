@@ -3,9 +3,11 @@ package itmo.blps.citilink.services
 import itmo.blps.citilink.models.Product
 import itmo.blps.citilink.repositories.ProductRepository
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+@Profile("shop")
 @Service
 class ProductServiceImpl(private val productRepository: ProductRepository) : ProductService {
 

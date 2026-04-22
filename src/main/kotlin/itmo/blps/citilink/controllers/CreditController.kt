@@ -10,12 +10,14 @@ import itmo.blps.citilink.services.CreditOfferService
 import itmo.blps.citilink.services.CreditService
 import itmo.blps.citilink.services.OrderService
 import jakarta.validation.Valid
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Кредитование", description = "Оформление кредитных заявок и выбор предложений")
+@Profile("shop")
 @RestController
 @RequestMapping("/credit")
 class CreditController(

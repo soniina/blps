@@ -4,6 +4,7 @@ import itmo.blps.citilink.models.CreditApplication
 import itmo.blps.citilink.models.CreditOffer
 import itmo.blps.citilink.repositories.CreditOfferRepository
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.context.annotation.Profile
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

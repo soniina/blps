@@ -6,12 +6,14 @@ import itmo.blps.citilink.dto.responses.CartResponse
 import itmo.blps.citilink.dto.responses.toResponse
 import itmo.blps.citilink.services.CartService
 import itmo.blps.citilink.services.ProductService
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Корзина", description = "Управление товарами в корзине пользователя")
+@Profile("shop")
 @RestController
 @RequestMapping("/cart")
 class CartController(

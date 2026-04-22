@@ -4,6 +4,8 @@ import jakarta.persistence.*
 
 enum class ApplicationStatus {
     SENT,
+    WAITING_FOR_BANKS,
+    OFFERS_READY,
     REJECTED,
     WAITING_FOR_OPERATOR,
     PENDING_SIGNATURE,

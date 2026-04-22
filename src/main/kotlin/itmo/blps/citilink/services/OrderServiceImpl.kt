@@ -5,10 +5,12 @@ import itmo.blps.citilink.models.*
 import itmo.blps.citilink.repositories.OrderItemRepository
 import itmo.blps.citilink.repositories.OrderRepository
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.security.access.AccessDeniedException
 
+@Profile("shop")
 @Service
 class OrderServiceImpl(
     private val orderRepository: OrderRepository, private val orderItemRepository: OrderItemRepository,
@@ -35,9 +37,9 @@ class OrderServiceImpl(
         val order = orderRepository.save(
             Order(
                 username = username,
-                recipientName = request.name!!,
-                recipientSurname = request.surname!!,
-                recipientPhone = request.phone!!,
+                recipientName = request.name,
+                recipientSurname = request.surname,
+                recipientPhone = request.phone,
                 receiptMethod = request.receiptMethod,
                 deliveryAddress = if (request.receiptMethod == ReceiptMethod.DELIVERY) request.deliveryAddress else null,
                 paymentMethod = request.paymentMethod,

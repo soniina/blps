@@ -5,10 +5,12 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import itmo.blps.citilink.dto.responses.CreditApplicationResponse
 import itmo.blps.citilink.dto.responses.toResponse
 import itmo.blps.citilink.services.CreditService
+import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Панель оператора", description = "Интерфейс для сотрудников по подписанию кредитных договоров")
+@Profile("shop")
 @RestController
 @RequestMapping("/operator")
 class OperatorController(private val creditService: CreditService) {

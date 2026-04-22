@@ -8,12 +8,14 @@ import itmo.blps.citilink.dto.responses.toResponse
 import itmo.blps.citilink.services.CartService
 import itmo.blps.citilink.services.OrderService
 import jakarta.validation.Valid
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
 @Tag(name = "Заказы", description = "Оформление и просмотр заказов")
+@Profile("shop")
 @RestController
 @RequestMapping("/orders")
 class OrderController(

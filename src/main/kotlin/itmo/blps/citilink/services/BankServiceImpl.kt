@@ -4,15 +4,17 @@ import itmo.blps.citilink.models.ApplicationStatus
 import itmo.blps.citilink.models.CreditApplication
 import itmo.blps.citilink.models.CreditOffer
 import itmo.blps.citilink.repositories.CreditApplicationRepository
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
+@Profile("banks")
 @Service
 class BankServiceImpl(
-    private val creditApplicationRepository: CreditApplicationRepository,
     private val creditOfferService: CreditOfferService,
+    private val creditApplicationRepository: CreditApplicationRepository
 ) : BankService {
 
     @Transactional
@@ -37,9 +39,10 @@ class BankServiceImpl(
         }
         if (approvedOffers.isNotEmpty()) {
             creditOfferService.saveCreditOffers(approvedOffers)
+            application.status = ApplicationStatus.OFFERS_READY
         } else {
             application.status = ApplicationStatus.REJECTED
-            creditApplicationRepository.save(application)
         }
+        creditApplicationRepository.save(application)
     }
 }
