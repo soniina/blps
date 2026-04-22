@@ -1,6 +1,7 @@
 package itmo.blps.citilink.services
 
 import itmo.blps.citilink.dto.requests.CreditApplicationRequest
+import itmo.blps.citilink.messaging.StompCreditRequestSender
 import itmo.blps.citilink.models.*
 import itmo.blps.citilink.repositories.CreditApplicationRepository
 import jakarta.persistence.EntityNotFoundException
@@ -12,7 +13,8 @@ import org.springframework.transaction.annotation.Transactional
 @Profile("shop")
 @Service
 class CreditServiceImpl(
-    private val creditApplicationRepository: CreditApplicationRepository
+    private val creditApplicationRepository: CreditApplicationRepository,
+    private val stompCreditRequestSender: StompCreditRequestSender
 ) : CreditService {
 
     @Transactional(readOnly = true)
@@ -39,7 +41,7 @@ class CreditServiceImpl(
             )
         )
         application.status = ApplicationStatus.WAITING_FOR_BANKS
-//        bankService.generateOffers(application)
+        stompCreditRequestSender.sendApplicationId(application.id)
         return application
     }
 

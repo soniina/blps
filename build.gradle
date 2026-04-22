@@ -35,6 +35,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-activemq'
 
+    implementation 'org.apache.activemq:activemq-stomp:6.1.7'
+
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
@@ -63,8 +65,20 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.named('bootWar') {
+bootWar {
     archiveFileName = 'ROOT.war'
+
+    doLast {
+        def folderNames = ['wildfly-shop', 'wildfly-banks']
+
+        folderNames.each { name ->
+            def targetPath = "${projectDir}/${name}/standalone/deployments"
+            copy {
+                from archiveFile
+                into targetPath
+            }
+        }
+    }
 }
 
 bootJar {
