@@ -39,6 +39,18 @@ class CreditController(
         return ResponseEntity.status(HttpStatus.CREATED).body(application.toResponse())
     }
 
+    @Operation(summary = "Получить информацию о заявке", description = "Возвращает текущие данные и статус конкретной кредитной заявки")
+    @GetMapping("/applications/{applicationId}")
+    fun getApplication(
+        authentication: Authentication,
+        @PathVariable applicationId: Long
+    ): ResponseEntity<CreditApplicationResponse> {
+        val username = authentication.name
+        val application = creditService.getCreditApplication(applicationId, username)
+
+        return ResponseEntity.ok(application.toResponse())
+    }
+
     @Operation(summary = "Список предложений", description = "Возвращает доступные предложения банков по конкретной заявке")
     @GetMapping("/applications/{applicationId}/offers")
     fun getOffers(
