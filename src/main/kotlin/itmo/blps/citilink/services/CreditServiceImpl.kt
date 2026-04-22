@@ -4,6 +4,8 @@ import itmo.blps.citilink.dto.requests.CreditApplicationRequest
 import itmo.blps.citilink.messaging.StompCreditRequestSender
 import itmo.blps.citilink.models.*
 import itmo.blps.citilink.repositories.CreditApplicationRepository
+import itmo.blps.citilink.repositories.OrderItemRepository
+import itmo.blps.citilink.services.warehouse.WarehouseJcaService
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.context.annotation.Profile
 import org.springframework.security.access.AccessDeniedException
@@ -14,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class CreditServiceImpl(
     private val creditApplicationRepository: CreditApplicationRepository,
+    private val warehouseJcaService: WarehouseJcaService,
+    private val orderItemRepository: OrderItemRepository,
     private val stompCreditRequestSender: StompCreditRequestSender
 ) : CreditService {
 
@@ -33,7 +37,7 @@ class CreditServiceImpl(
             CreditApplication(
                 order = order,
                 termMonths = request.termMonths,
-                initialPayment = request.initialPayment,
+                initialPayment = request.initialPayment ?: 0.0,
                 passportSeries = request.passportSeries,
                 passportNumber = request.passportNumber,
                 email = request.email,
@@ -53,11 +57,23 @@ class CreditServiceImpl(
     @Transactional
     override fun approveOfflineSigning(applicationId: Long): CreditApplication {
         val application = creditApplicationRepository.findById(applicationId)
-            .orElseThrow { EntityNotFoundException("CreditApplication with id $applicationId not found") }
+            .orElseThrow { EntityNotFoundException("Application not found") }
 
         application.status = ApplicationStatus.SIGNED
         application.order.status = OrderStatus.PROCESSING
-        return creditApplicationRepository.save(application)
+        val savedApplication = creditApplicationRepository.save(application)
+        // получаем список товаров через репозиторий
+        val items = orderItemRepository.findAllByOrder(application.order)
+
+        items.forEach { item ->
+            warehouseJcaService.reserveProduct(
+                orderId = application.order.id.toString(),
+                productId = item.product.id!!,
+                quantity = item.quantity
+            )
+        }
+
+        return savedApplication
     }
 
     @Transactional
@@ -77,19 +93,18 @@ class CreditServiceImpl(
     }
 
     @Transactional
-    override fun signApplication(creditApplication: CreditApplication) {
-        val selectedOffer = creditApplication.selectedOffer
-            ?: throw IllegalStateException("No offer selected for this application. Please select an offer first.")
+    override fun signApplication(application: CreditApplication) {
+        application.status = ApplicationStatus.SIGNED
+        application.order.status = OrderStatus.PROCESSING
+        creditApplicationRepository.save(application)
+        val items = orderItemRepository.findAllByOrder(application.order)
 
-        if (!selectedOffer.isOnlineSigningAvailable)
-            throw IllegalStateException("Online signing is not available for this offer")
-
-        if (creditApplication.status != ApplicationStatus.PENDING_SIGNATURE)
-            throw IllegalStateException("This application has already been signed.")
-
-        creditApplication.status = ApplicationStatus.SIGNED
-        creditApplication.order.status = OrderStatus.PROCESSING
-        creditApplicationRepository.save(creditApplication)
+        items.forEach { item ->
+            warehouseJcaService.reserveProduct(
+                orderId = application.order.id.toString(),
+                productId = item.product.id!!,
+                quantity = item.quantity
+            )
+        }
     }
-
 }

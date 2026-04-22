@@ -31,6 +31,6 @@ class JaasConfig {
         }
 
         JaasConfiguration.setConfiguration(customConfig)
-        println("JAAS: Программная конфигурация для 'CitilinkLogin' успешно установлена.")
+        println("JAAS: program configuration of 'CitilinkLogin' successfully downloaded")
     }
 }

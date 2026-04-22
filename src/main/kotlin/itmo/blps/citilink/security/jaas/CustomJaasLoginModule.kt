@@ -45,21 +45,23 @@ class CustomJaasLoginModule : LoginModule {
 
         val inputUser = (callbacks[0] as NameCallback).name
         val inputPass = String((callbacks[1] as PasswordCallback).password)
-        println("JAAS: Попытка входа пользователя: $inputUser")
+        println("JAAS: user login attempt: $inputUser")
 
         try {
-            val xmlFile = File(JaasConfig.USERS_XML_PATH)
+            val inputUser = (callbacks[0] as NameCallback).name
+            val inputPass = String((callbacks[1] as PasswordCallback).password)
 
-            if (!xmlFile.exists()) {
-                println("JAAS ОШИБКА: Файл ${xmlFile.absolutePath} не найден!")
-                return false
-            }
+            println("JAAS: login attempt for user: $inputUser")
 
-            val usersList = xmlMapper.readValue(xmlFile, UsersList::class.java)
+            val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream("users.xml")
+                ?: this::class.java.classLoader.getResourceAsStream("users.xml")
+                ?: throw Exception("File users.xml not found in classpath!")
 
-            usersList.users.forEach {
-                println("DEBUG XML: Прочитан юзер [${it.username}], роль [${it.role}]")
-            }
+            val xmlMapper = com.fasterxml.jackson.dataformat.xml.XmlMapper.builder()
+                .addModule(com.fasterxml.jackson.module.kotlin.KotlinModule.Builder().build())
+                .build()
+
+            val usersList = xmlMapper.readValue(inputStream, UsersList::class.java)
 
             val foundUser = usersList.users.find {
                 val usernameMatch = it.username.trim() == inputUser.trim()
@@ -81,17 +83,17 @@ class CustomJaasLoginModule : LoginModule {
             }
 
             if (foundUser != null) {
-                println("JAAS: Пользователь найден. Роль: ${foundUser.role}")
+                println("JAAS: user founded. Role: ${foundUser.role}")
                 username = foundUser.username
                 role = foundUser.role
                 loginSucceeded = true
                 return true
             } else {
-                println("JAAS: Пользователь не найден или пароль неверный")
+                println("JAAS: user not founded or password incorrect")
             }
 
         } catch (e: Exception) {
-            println("JAAS ошибка: ${e.message}")
+            println("JAAS error: ${e.message}")
         }
         return false
     }

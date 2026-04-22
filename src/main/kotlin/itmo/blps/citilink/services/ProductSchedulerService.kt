@@ -22,7 +22,7 @@ class ProductSchedulerService(private val productRepository: ProductRepository) 
             val randomProducts = currentProducts.shuffled().take(3)
             randomProducts.forEach { it.isProductOfDay = true }
             productRepository.saveAll(currentProducts)
-            println("Планировщик: Новые товары дня выбраны успешно.")
+            println("Scheduler: new products of the day have been selected successfully")
         }
     }
 }
