@@ -4,6 +4,7 @@ import itmo.blps.citilink.dto.requests.OrderRequest
 import itmo.blps.citilink.models.*
 import itmo.blps.citilink.repositories.OrderItemRepository
 import itmo.blps.citilink.repositories.OrderRepository
+import itmo.blps.citilink.services.warehouse.WarehouseJcaService
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
@@ -13,17 +14,19 @@ import org.springframework.security.access.AccessDeniedException
 @Profile("shop")
 @Service
 class OrderServiceImpl(
-    private val orderRepository: OrderRepository, private val orderItemRepository: OrderItemRepository,
-    private val productService: ProductService, private val cartService: CartService
+    private val orderRepository: OrderRepository,
+    private val orderItemRepository: OrderItemRepository,
+    private val productService: ProductService,
+    private val cartService: CartService,
+    private val warehouseJcaService: WarehouseJcaService
 ) : OrderService {
 
     @Transactional(readOnly = true)
     override fun getOrder(orderId: Long, username: String): Order {
-        val order =
-            orderRepository.findOrderById(orderId) ?: throw EntityNotFoundException("Order with id $orderId not found")
+        val order = orderRepository.findOrderById(orderId)
+            ?: throw EntityNotFoundException("Order with id $orderId not found")
 
-        if (order.username != username) throw AccessDeniedException("You cannot access orders of another user")
-
+        if (order.username != username) throw AccessDeniedException("Access denied")
         return order
     }
 
@@ -34,21 +37,24 @@ class OrderServiceImpl(
         val itemsPrice = items.sumOf { it.product.price * it.quantity }
         val deliveryPrice = calculateDeliveryPrice(request.receiptMethod, itemsPrice)
 
+        // создание и сохранение заказа в БД (commit еще не произошел)
         val order = orderRepository.save(
             Order(
                 username = username,
-                recipientName = request.name,
-                recipientSurname = request.surname,
-                recipientPhone = request.phone,
+                recipientName = request.name!!,
+                recipientSurname = request.surname!!,
+                recipientPhone = request.phone!!,
                 receiptMethod = request.receiptMethod,
                 deliveryAddress = if (request.receiptMethod == ReceiptMethod.DELIVERY) request.deliveryAddress else null,
                 paymentMethod = request.paymentMethod,
                 itemsPrice = itemsPrice,
                 deliveryPrice = deliveryPrice,
-                totalAmount = itemsPrice + deliveryPrice
+                totalAmount = itemsPrice + deliveryPrice,
+                status = OrderStatus.PENDING
             )
         )
 
+        // проверка склада через JCA
         items.forEach { item ->
             productService.decreaseStock(item.product.id!!, item.quantity)
 
@@ -59,9 +65,17 @@ class OrderServiceImpl(
                     quantity = item.quantity
                 )
             )
+
+            // вызов внешней системы
+            warehouseJcaService.reserveProduct(
+                orderId = order.id.toString(),
+                productId = item.product.id!!,
+                quantity = item.quantity
+            )
         }
 
         cartService.clearCart(username)
+
         return order
     }
 

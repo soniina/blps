@@ -4,8 +4,6 @@ import itmo.blps.citilink.dto.requests.CreditApplicationRequest
 import itmo.blps.citilink.messaging.StompCreditRequestSender
 import itmo.blps.citilink.models.*
 import itmo.blps.citilink.repositories.CreditApplicationRepository
-import itmo.blps.citilink.repositories.OrderItemRepository
-import itmo.blps.citilink.services.warehouse.WarehouseJcaService
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.context.annotation.Profile
 import org.springframework.security.access.AccessDeniedException
@@ -16,18 +14,15 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class CreditServiceImpl(
     private val creditApplicationRepository: CreditApplicationRepository,
-    private val warehouseJcaService: WarehouseJcaService,
-    private val orderItemRepository: OrderItemRepository,
     private val stompCreditRequestSender: StompCreditRequestSender
 ) : CreditService {
 
     @Transactional(readOnly = true)
     override fun getCreditApplication(applicationId: Long, username: String): CreditApplication {
         val application = creditApplicationRepository.findCreditApplicationsById(applicationId)
-            ?: throw EntityNotFoundException("CreditApplication with id $applicationId not found")
+            ?: throw EntityNotFoundException("CreditApplication not found")
 
-        if (application.order.username != username) throw AccessDeniedException("You cannot access orders of another user")
-
+        if (application.order.username != username) throw AccessDeniedException("Access denied")
         return application
     }
 
@@ -45,7 +40,10 @@ class CreditServiceImpl(
             )
         )
         application.status = ApplicationStatus.WAITING_FOR_BANKS
-        stompCreditRequestSender.sendApplicationId(application.id)
+
+        // Асинхронная отправка в ActiveMQ (задание напарника)
+        stompCreditRequestSender.sendApplicationId(application.id!!)
+
         return application
     }
 
@@ -61,19 +59,14 @@ class CreditServiceImpl(
 
         application.status = ApplicationStatus.SIGNED
         application.order.status = OrderStatus.PROCESSING
-        val savedApplication = creditApplicationRepository.save(application)
-        // получаем список товаров через репозиторий
-        val items = orderItemRepository.findAllByOrder(application.order)
+        return creditApplicationRepository.save(application)
+    }
 
-        items.forEach { item ->
-            warehouseJcaService.reserveProduct(
-                orderId = application.order.id.toString(),
-                productId = item.product.id!!,
-                quantity = item.quantity
-            )
-        }
-
-        return savedApplication
+    @Transactional
+    override fun signApplication(application: CreditApplication) {
+        application.status = ApplicationStatus.SIGNED
+        application.order.status = OrderStatus.PROCESSING
+        creditApplicationRepository.save(application)
     }
 
     @Transactional
@@ -90,21 +83,5 @@ class CreditServiceImpl(
         else creditApplication.status = ApplicationStatus.WAITING_FOR_OPERATOR
 
         creditApplicationRepository.save(creditApplication)
-    }
-
-    @Transactional
-    override fun signApplication(application: CreditApplication) {
-        application.status = ApplicationStatus.SIGNED
-        application.order.status = OrderStatus.PROCESSING
-        creditApplicationRepository.save(application)
-        val items = orderItemRepository.findAllByOrder(application.order)
-
-        items.forEach { item ->
-            warehouseJcaService.reserveProduct(
-                orderId = application.order.id.toString(),
-                productId = item.product.id!!,
-                quantity = item.quantity
-            )
-        }
     }
 }
