@@ -16,24 +16,24 @@ class StompCreditRequestSender(
 ) {
 
     fun sendApplicationId(applicationId: Long?) {
-        val applicationId = applicationId?.toString() ?: throw IllegalArgumentException(">>> STOMP ERROR: Невозможно отправить null ID")
+        val applicationId = applicationId?.toString() ?: throw IllegalArgumentException(">>> STOMP ERROR: impossible to send null ID")
 
         val connection = StompConnection()
         try {
-            println(">>> STOMP: Подключение к $host:$port...")
+            println(">>> STOMP: Connecting to $host:$port...")
 
             connection.open(host, port)
             connection.connect(login, pass)
 
-            println(">>> STOMP: Соединение установлено. Отправка ID $applicationId")
+            println(">>> STOMP: The connection is established. Shipment ID $applicationId")
 
             connection.send(queueName, applicationId)
 
             connection.disconnect()
 
-            println(">>> STOMP: Заявка успешно отправлена в $queueName")
+            println(">>> STOMP: The application was successfully submitted to $queueName")
         } catch (e: Exception) {
-            println(">>> STOMP ERROR: Ошибка при работе с очередью: \${e.message}")
+            println(">>> STOMP ERROR: Error when working with the queue: \${e.message}")
             e.printStackTrace()
         } finally {
             connection.close()

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ironjacamar xmlns="http://www.ironjacamar.org/schema/eis/1.1">
+    <connection-definitions>
+        <connection-definition class-name="itmo.blps.warehouse.ManagedConnectionFactoryImpl"
+                               jndi-name="java:/eis/WarehouseConnector"
+                               pool-name="WarehousePool">
+        </connection-definition>
+    </connection-definitions>
+</ironjacamar>

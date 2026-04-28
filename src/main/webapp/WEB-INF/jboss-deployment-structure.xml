@@ -4,7 +4,6 @@
         <exclude-subsystems>
             <subsystem name="logging"/>
             <subsystem name="jpa"/>
-            <!-- ГЛАВНОЕ: Отключаем JAX-RS сервера, так как он тянет старый Jackson -->
             <subsystem name="jaxrs"/>
             <subsystem name="weld"/>
         </exclude-subsystems>

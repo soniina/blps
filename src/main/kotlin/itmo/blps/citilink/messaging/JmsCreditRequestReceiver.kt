@@ -15,12 +15,12 @@ class CreditRequestReceiver(
 ) {
     @JmsListener(destination = "java:/jms/queue/CreditRequestsQueue")
     fun receiveApplication(applicationId: String) {
-        println(">>> JMS: Получен запрос на генерацию офферов для заявки №$applicationId")
+        println(">>> JMS: A request has been received to generate offers for the application №$applicationId")
 
         val application = creditApplicationRepository.findCreditApplicationsById(applicationId.toLong())
             ?: throw EntityNotFoundException(">>> JMS: CreditApplication with id $applicationId not found")
 
         bankService.generateOffers(application)
-        println(">>> JMS: Офферы для заявки №$applicationId успешно сгенерированы")
+        println(">>> JMS: Application offers №$applicationId successfully generated")
     }
 }

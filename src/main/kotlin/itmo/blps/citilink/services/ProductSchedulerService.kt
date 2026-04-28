@@ -1,10 +1,12 @@
 package itmo.blps.citilink.services
 
 import itmo.blps.citilink.repositories.ProductRepository
+import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+@Profile("shop")
 @Service
 class ProductSchedulerService(private val productRepository: ProductRepository) {
 

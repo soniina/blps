@@ -1,9 +1,9 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '2.2.21'
-    id 'org.jetbrains.kotlin.plugin.spring' version '2.2.21'
-    id 'org.springframework.boot' version '3.5.11'
-    id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.jetbrains.kotlin.plugin.jpa' version '2.2.21'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.24'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.9.24'
+    id 'org.springframework.boot' version '3.3.0'
+    id 'io.spring.dependency-management' version '1.1.5'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.24'
     id 'war'
 }
 
@@ -22,28 +22,38 @@ repositories {
 }
 
 dependencies {
+    // Spring Boot Starters
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
-
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-activemq'
 
-    implementation 'org.apache.activemq:activemq-stomp:6.1.7'
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    // XML & JSON & Reflect
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
-
+    // Open API
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
+    // Messaging
+    implementation 'org.apache.activemq:activemq-stomp:6.1.2'
+
+    // Database
     runtimeOnly 'org.postgresql:postgresql'
 
+    compileOnly 'jakarta.resource:jakarta.resource-api:2.0.0'
+    compileOnly 'jakarta.transaction:jakarta.transaction-api:2.0.0'
+    compileOnly 'jakarta.platform:jakarta.jakartaee-api:9.1.0'
+
+    // Server & Test
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
@@ -66,12 +76,31 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+
+tasks.register('driverJar', Jar) {
+    dependsOn 'classes'
+    archiveFileName = "warehouse-driver.jar"
+    from("${buildDir}/classes/kotlin/main")
+    from("${buildDir}/classes/java/main")
+    include 'itmo/blps/warehouse/**'
+}
+
+tasks.register('buildRar', Zip) {
+    dependsOn 'driverJar'
+    archiveFileName = "warehouse-ra.rar"
+    destinationDirectory = layout.buildDirectory.dir("libs")
+    archiveExtension = 'rar'
+    from(driverJar.archiveFile)
+    into('META-INF') {
+        from 'src/main/resources/META-INF/ra.xml'
+        from 'src/main/resources/META-INF/ironjacamar.xml'
+    }
+}
+
 bootWar {
     archiveFileName = 'ROOT.war'
-
     doLast {
         def folderNames = ['wildfly-shop', 'wildfly-banks']
-
         folderNames.each { name ->
             def targetPath = "${projectDir}/${name}/standalone/deployments"
             copy {
