@@ -12,7 +12,6 @@ public class WarehouseManagedConnection implements ManagedConnection {
     private final String apiToken;
     private final String userEmail;
 
-    // Конструктор, который примет данные от фабрики
     public WarehouseManagedConnection(String jiraUrl, String apiToken, String userEmail) {
         this.jiraUrl = jiraUrl;
         this.apiToken = apiToken;
@@ -21,7 +20,6 @@ public class WarehouseManagedConnection implements ManagedConnection {
 
     @Override
     public Object getConnection(Subject subject, ConnectionRequestInfo info) throws ResourceException {
-        // Передаем значения дальше в объект соединения
         return new WarehouseConnection(jiraUrl, apiToken, userEmail);
     }
 

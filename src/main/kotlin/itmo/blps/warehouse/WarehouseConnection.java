@@ -14,16 +14,13 @@ public class WarehouseConnection implements Connection {
     private final String apiToken;
     private final String userEmail;
 
-    // настройки из ManagedConnection
     public WarehouseConnection(String jiraUrl, String apiToken, String userEmail) {
         this.jiraUrl = jiraUrl;
         this.apiToken = apiToken;
         this.userEmail = userEmail;
     }
 
-    /**
-     * Метод для создания задачи в Jira
-     */
+
     public void createJiraIssue(String summary, String description) throws ResourceException {
         try {
             String auth = userEmail + ":" + apiToken;
@@ -49,35 +46,22 @@ public class WarehouseConnection implements Connection {
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
 
-            // Отправляем запрос
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Проверяем статус ответа (201 Created)
             if (response.statusCode() >= 400) {
-                throw new ResourceException("Jira API error: " + response.statusCode() + " - " + response.body());
+                throw new ResourceException("Warehouse reservation rejected: " + response.statusCode() + " - " + response.body());
             }
 
-            System.out.println("Jira issue created successfully. Response: " + response.body());
+            System.out.println("JCA Warehouse: Item successfully reserved in Jira. ID: " + response.body());
 
         } catch (Exception e) {
-            throw new ResourceException("Failed to create Jira issue", e);
+            throw new ResourceException("Critical warehouse integration error", e);
         }
     }
 
-    @Override
-    public Interaction createInteraction() throws ResourceException { return null; }
-
-    @Override
-    public LocalTransaction getLocalTransaction() throws ResourceException { return null; }
-
-    @Override
-    public ConnectionMetaData getMetaData() throws ResourceException { return null; }
-
-    @Override
-    public ResultSetInfo getResultSetInfo() throws ResourceException { return null; }
-
-    @Override
-    public void close() throws ResourceException {
-        // Логика закрытия соединения, если требуется
-    }
+    @Override public Interaction createInteraction() throws ResourceException { return null; }
+    @Override public LocalTransaction getLocalTransaction() throws ResourceException { return null; }
+    @Override public ConnectionMetaData getMetaData() throws ResourceException { return null; }
+    @Override public ResultSetInfo getResultSetInfo() throws ResourceException { return null; }
+    @Override public void close() throws ResourceException {}
 }

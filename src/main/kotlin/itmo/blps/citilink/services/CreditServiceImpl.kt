@@ -20,7 +20,6 @@ class CreditServiceImpl(
     private val stompCreditRequestSender: StompCreditRequestSender
 ) : CreditService {
 
-    // инъекция внешнего ресурса (JCA адаптера из JNDI сервера WildFly)
     @Resource(mappedName = "java:/eis/WarehouseConnector")
     private lateinit var jiraFactory: WarehouseConnectionFactory
 
@@ -33,8 +32,9 @@ class CreditServiceImpl(
         return application
     }
 
-    @Transactional
+    @Transactional(rollbackFor = [Exception::class]) // Откатываем БД при ошибке в Jira
     override fun process(request: CreditApplicationRequest, order: Order): CreditApplication {
+        // 1. Блок: "Запрос на сохранение нового заказа"
         val application = creditApplicationRepository.save(
             CreditApplication(
                 order = order,
@@ -46,24 +46,39 @@ class CreditServiceImpl(
                 phone = request.phone
             )
         )
+
+        // "Запрос в склад" (Jira JCA)
+        // Если тут упадет исключение (например, Jira 400), Spring сделает ROLLBACK для записи выше
+        reserveInWarehouse(application)
+
+        // "Достаточно ли товара" = ДА
         application.status = ApplicationStatus.WAITING_FOR_BANKS
+        val finalSavedApp = creditApplicationRepository.save(application)
 
-        // уведомление Jira о создании новой заявки через JCA
-        sendJiraNotification(
-            "Новая заявка на кредит №${application.id}",
-            "Клиент ${application.email} ожидает ответа от банков. Сумма заказа: ${order.totalAmount}"
-        )
+        // переход к асинхронной части (ActiveMQ)
+        stompCreditRequestSender.sendApplicationId(finalSavedApp.id!!)
 
-        // синхронная отправка в ActiveMQ
-        stompCreditRequestSender.sendApplicationId(application.id!!)
-
-        return application
+        return finalSavedApp
     }
 
-    @Transactional(readOnly = true)
-    override fun getApplicationsForOperator(): List<CreditApplication> {
-        return creditApplicationRepository.findAllByStatus(ApplicationStatus.WAITING_FOR_OPERATOR)
+    /**
+     * Блокирующий метод вызова JCA. Бросает исключение при ошибке.
+     */
+    private fun reserveInWarehouse(app: CreditApplication) {
+        val connection = jiraFactory.connection as WarehouseConnection
+        try {
+            println("JCA Warehouse: attempt to reserve the item for order ${app.order.id}")
+            connection.createJiraIssue(
+                "БРОНЬ: Заказ №${app.order.id}",
+                "Новая заявка на кредит №${app.id}. Клиент: ${app.email}. Требуется резерв товара."
+            )
+            println("JCA Warehouse: successfully booked via JCA connector")
+        } finally {
+            connection.close() // Всегда закрываем соединение
+        }
     }
+
+    // остальные методы используют неблокирующие уведомления
 
     @Transactional
     override fun approveOfflineSigning(applicationId: Long): CreditApplication {
@@ -73,10 +88,9 @@ class CreditServiceImpl(
         application.status = ApplicationStatus.SIGNED
         application.order.status = OrderStatus.PROCESSING
 
-        // уведомление Jira о ручном одобрении оператором
-        sendJiraNotification(
+        sendSafeNotification(
             "Заявка №${application.id} одобрена оператором",
-            "Требуется выгрузка товара со склада."
+            "Требуется выгрузка со склада."
         )
 
         return creditApplicationRepository.save(application)
@@ -86,15 +100,29 @@ class CreditServiceImpl(
     override fun signApplication(application: CreditApplication) {
         application.status = ApplicationStatus.SIGNED
         application.order.status = OrderStatus.PROCESSING
-
         val saved = creditApplicationRepository.save(application)
 
-        // финальное уведомление в Jira
-        sendJiraNotification(
-            "Заявка №${saved.id} полностью подписана",
-            "Кредит оформлен. Передано в службу доставки."
+        sendSafeNotification(
+            "Заявка №${saved.id} подписана",
+            "Кредит оформлен. Передано в доставку."
         )
     }
+
+    @Transactional
+    override fun selectOffer(creditApplication: CreditApplication, offer: CreditOffer) {
+        creditApplication.selectedOffer = offer
+        if (offer.isOnlineSigningAvailable) {
+            creditApplication.status = ApplicationStatus.PENDING_SIGNATURE
+        } else {
+            creditApplication.status = ApplicationStatus.WAITING_FOR_OPERATOR
+            sendSafeNotification("Нужна помощь оператора (Заявка №${creditApplication.id})", "Офлайн.")
+        }
+        creditApplicationRepository.save(creditApplication)
+    }
+
+    @Transactional(readOnly = true)
+    override fun getApplicationsForOperator(): List<CreditApplication> =
+        creditApplicationRepository.findAllByStatus(ApplicationStatus.WAITING_FOR_OPERATOR)
 
     @Transactional
     override fun updateStatus(creditApplication: CreditApplication, status: ApplicationStatus) {
@@ -102,39 +130,16 @@ class CreditServiceImpl(
         creditApplicationRepository.save(creditApplication)
     }
 
-    @Transactional
-    override fun selectOffer(creditApplication: CreditApplication, offer: CreditOffer) {
-        creditApplication.selectedOffer = offer
-
-        if (offer.isOnlineSigningAvailable) {
-            creditApplication.status = ApplicationStatus.PENDING_SIGNATURE
-        } else {
-            creditApplication.status = ApplicationStatus.WAITING_FOR_OPERATOR
-            // тикет на помощь оператора
-            sendJiraNotification("Нужна помощь оператора (Заявка №${creditApplication.id})", "Офлайн подписание.")
-        }
-
-        creditApplicationRepository.save(creditApplication)
-    }
-
     /**
-     * Вспомогательный метод для взаимодействия с JCA адаптером
+     * Вспомогательный метод для статусов, где падение Jira не должно прерывать работу
      */
-    private fun sendJiraNotification(summary: String, description: String) {
+    private fun sendSafeNotification(summary: String, description: String) {
         try {
-            // 1. Получаем соединение из пула WildFly
             val connection = jiraFactory.connection as WarehouseConnection
-
-            // 2. Вызываем метод нашего адаптера (JCA Driver)
-            // Убедись, что этот метод реализован в твоем WarehouseConnection классе в RAR модуле!
             connection.createJiraIssue(summary, description)
-
-            // 3. Закрываем соединение (возвращаем в пул)
             connection.close()
         } catch (e: Exception) {
-            // Важно: ошибку логируем, но не бросаем дальше, чтобы не откатывать основную транзакцию БД
-            // из-за проблем со связью с Jira (если только это не критично по ТЗ)
-            println("FAILED TO NOTIFY JIRA: ${e.message}")
+            println("NON-CRITICAL JIRA NOTIFY FAILED: ${e.message}")
         }
     }
 }

@@ -75,7 +75,6 @@ allOpen {
 tasks.named('test') {
     useJUnitPlatform()
 }
-// 0. ТАК МЫ ГОВОРИМ GRADLE, ЧТО JAVA ФАЙЛЫ ЛЕЖАТ В ПАПКЕ KOTLIN
 sourceSets {
     main {
         java {
@@ -84,7 +83,7 @@ sourceSets {
     }
 }
 
-// 1. Собираем JAR со всеми скомпилированными классами
+// собираем JAR со всеми скомпилированными классами
 tasks.register('driverJar', Jar) {
     // Ждем завершения компиляции обоих языков
     dependsOn 'compileJava', 'compileKotlin'
@@ -100,7 +99,7 @@ tasks.register('driverJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-// 2. Собираем RAR
+// собираем RAR
 tasks.register('buildRar', Zip) {
     dependsOn 'driverJar'
     archiveFileName = "warehouse-ra.rar"
@@ -110,11 +109,8 @@ tasks.register('buildRar', Zip) {
     // Кладем наш JAR в корень RAR
     from(driverJar.archiveFile)
 
-    // Кладем дескрипторы строго в META-INF внутри RAR
     into('META-INF') {
         from 'src/main/resources/META-INF/ra.xml'
-        // ironjacamar.xml лучше ПОКА УБРАТЬ или закомментировать,
-        // если он пустой, чтобы не мешал настройкам в standalone-full.xml
     }
 }
 

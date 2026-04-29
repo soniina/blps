@@ -22,12 +22,11 @@ public class WarehouseConnectionFactory implements ConnectionFactory, Serializab
 
     @Override
     public Connection getConnection() throws ResourceException {
-        // Если ConnectionManager (cm) равен null, значит мы работаем вне сервера (unmanaged mode)
+        // если ConnectionManager равен null, значит мы работаем вне сервера (unmanaged mode)
         if (cm == null) {
-            // Приводим наш mcf к реализации, чтобы достать настройки Jira
+            // mcf приводим к реализации, чтобы достать настройки Jira
             ManagedConnectionFactoryImpl mcfImpl = (ManagedConnectionFactoryImpl) mcf;
 
-            // Передаем 3 аргумента, которые теперь требует конструктор
             return new WarehouseConnection(
                     mcfImpl.getJiraUrl(),
                     mcfImpl.getApiToken(),
