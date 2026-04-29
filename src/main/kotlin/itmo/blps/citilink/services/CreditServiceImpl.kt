@@ -103,7 +103,8 @@ class CreditServiceImpl(
         val saved = creditApplicationRepository.save(application)
 
         sendSafeNotification(
-            "Заявка №${saved.id} подписана",
+            //"Заявка №${saved.id} подписана",
+            "Нужно приступить к сборке заказа \${order.id}",
             "Кредит оформлен. Передано в доставку."
         )
     }
