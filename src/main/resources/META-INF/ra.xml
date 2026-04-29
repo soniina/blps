@@ -5,11 +5,12 @@
            version="2.0">
 
     <vendor-name>ITMO</vendor-name>
-    <eis-type>Warehouse</eis-type>
+    <eis-type>JiraIntegration</eis-type>
     <resourceadapter-version>1.0</resourceadapter-version>
 
     <resourceadapter>
         <resourceadapter-class>itmo.blps.warehouse.WarehouseResourceAdapter</resourceadapter-class>
+
         <outbound-resourceadapter>
             <connection-definition>
                 <managedconnectionfactory-class>itmo.blps.warehouse.ManagedConnectionFactoryImpl</managedconnectionfactory-class>
@@ -17,7 +18,22 @@
                 <connectionfactory-impl-class>itmo.blps.warehouse.WarehouseConnectionFactory</connectionfactory-impl-class>
                 <connection-interface>jakarta.resource.cci.Connection</connection-interface>
                 <connection-impl-class>itmo.blps.warehouse.WarehouseConnection</connection-impl-class>
+
+                <!-- Свойства должны быть ТУТ, так как они в ManagedConnectionFactoryImpl -->
+                <config-property>
+                    <config-property-name>jiraUrl</config-property-name>
+                    <config-property-type>java.lang.String</config-property-type>
+                </config-property>
+                <config-property>
+                    <config-property-name>apiToken</config-property-name>
+                    <config-property-type>java.lang.String</config-property-type>
+                </config-property>
+                <config-property>
+                    <config-property-name>userEmail</config-property-name>
+                    <config-property-type>java.lang.String</config-property-type>
+                </config-property>
             </connection-definition>
+
             <transaction-support>NoTransaction</transaction-support>
             <reauthentication-support>false</reauthentication-support>
         </outbound-resourceadapter>

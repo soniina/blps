@@ -75,30 +75,52 @@ allOpen {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-
-tasks.register('driverJar', Jar) {
-    dependsOn 'classes'
-    archiveFileName = "warehouse-driver.jar"
-    from("${buildDir}/classes/kotlin/main")
-    from("${buildDir}/classes/java/main")
-    include 'itmo/blps/warehouse/**'
+// 0. ТАК МЫ ГОВОРИМ GRADLE, ЧТО JAVA ФАЙЛЫ ЛЕЖАТ В ПАПКЕ KOTLIN
+sourceSets {
+    main {
+        java {
+            srcDirs += 'src/main/kotlin'
+        }
+    }
 }
 
+// 1. Собираем JAR со всеми скомпилированными классами
+tasks.register('driverJar', Jar) {
+    // Ждем завершения компиляции обоих языков
+    dependsOn 'compileJava', 'compileKotlin'
+    archiveFileName = "warehouse-driver.jar"
+
+    // Берем все скомпилированные классы из всех директорий (java и kotlin)
+    from sourceSets.main.output
+
+    // Включаем только нужный пакет, чтобы не тащить лишнее из Spring
+    include 'itmo/blps/warehouse/**'
+
+    // На всякий случай дублируем стратегию имен
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// 2. Собираем RAR
 tasks.register('buildRar', Zip) {
     dependsOn 'driverJar'
     archiveFileName = "warehouse-ra.rar"
     destinationDirectory = layout.buildDirectory.dir("libs")
     archiveExtension = 'rar'
+
+    // Кладем наш JAR в корень RAR
     from(driverJar.archiveFile)
+
+    // Кладем дескрипторы строго в META-INF внутри RAR
     into('META-INF') {
         from 'src/main/resources/META-INF/ra.xml'
-        from 'src/main/resources/META-INF/ironjacamar.xml'
+        // ironjacamar.xml лучше ПОКА УБРАТЬ или закомментировать,
+        // если он пустой, чтобы не мешал настройкам в standalone-full.xml
     }
 }
 
 bootWar {
     archiveFileName = 'ROOT.war'
+    rootSpec.exclude('itmo/blps/warehouse/**')
     doLast {
         def folderNames = ['wildfly-shop', 'wildfly-banks']
         folderNames.each { name ->

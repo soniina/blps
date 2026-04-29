@@ -13,15 +13,8 @@ public class WarehouseConnectionFactory implements ConnectionFactory, Serializab
     private ManagedConnectionFactory mcf;
     private ConnectionManager cm;
 
-    /**
-     * Обязательный пустой конструктор для сериализации
-     */
-    public WarehouseConnectionFactory() {
-    }
+    public WarehouseConnectionFactory() {}
 
-    /**
-     * Основной конструктор, используемый ManagedConnectionFactory
-     */
     public WarehouseConnectionFactory(ManagedConnectionFactory mcf, ConnectionManager cm) {
         this.mcf = mcf;
         this.cm = cm;
@@ -29,9 +22,20 @@ public class WarehouseConnectionFactory implements ConnectionFactory, Serializab
 
     @Override
     public Connection getConnection() throws ResourceException {
+        // Если ConnectionManager (cm) равен null, значит мы работаем вне сервера (unmanaged mode)
         if (cm == null) {
-            throw new ResourceException("ConnectionManager is null");
+            // Приводим наш mcf к реализации, чтобы достать настройки Jira
+            ManagedConnectionFactoryImpl mcfImpl = (ManagedConnectionFactoryImpl) mcf;
+
+            // Передаем 3 аргумента, которые теперь требует конструктор
+            return new WarehouseConnection(
+                    mcfImpl.getJiraUrl(),
+                    mcfImpl.getApiToken(),
+                    mcfImpl.getUserEmail()
+            );
         }
+
+        // В режиме сервера (managed mode) cm сам создаст соединение через ManagedConnection
         return (Connection) cm.allocateConnection(mcf, null);
     }
 
@@ -41,34 +45,25 @@ public class WarehouseConnectionFactory implements ConnectionFactory, Serializab
     }
 
     @Override
-    public RecordFactory getRecordFactory() throws ResourceException {
-        return null;
-    }
-
+    public RecordFactory getRecordFactory() throws ResourceException { return null; }
     @Override
-    public ResourceAdapterMetaData getMetaData() throws ResourceException {
-        return null;
-    }
-
+    public ResourceAdapterMetaData getMetaData() throws ResourceException { return null; }
     @Override
-    public void setReference(Reference ref) {
-        this.ref = ref;
-    }
-
+    public void setReference(Reference ref) { this.ref = ref; }
     @Override
-    public Reference getReference() {
-        return ref;
-    }
+    public Reference getReference() { return ref; }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) return false;
-        if (obj == this) return true;
-        return (obj instanceof WarehouseConnectionFactory);
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        WarehouseConnectionFactory other = (WarehouseConnectionFactory) obj;
+        if (mcf == null) return other.mcf == null;
+        return mcf.equals(other.mcf);
     }
 
     @Override
     public int hashCode() {
-        return WarehouseConnectionFactory.class.hashCode();
+        return (mcf != null ? mcf.hashCode() : 0);
     }
 }

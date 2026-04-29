@@ -3,13 +3,13 @@ package itmo.blps.warehouse;
 import jakarta.resource.ResourceException;
 import jakarta.resource.spi.*;
 import jakarta.resource.spi.endpoint.MessageEndpointFactory;
-import javax.transaction.xa.XAResource; // ВАЖНО: javax, а не jakarta
+import javax.transaction.xa.XAResource;
 import java.io.Serializable;
 
-//@Connector(displayName = "Warehouse RA", vendorName = "ITMO", eisType = "Warehouse", version = "1.0")
 public class WarehouseResourceAdapter implements ResourceAdapter, Serializable {
+    private static final long serialVersionUID = 1L;
 
-    public WarehouseResourceAdapter() {} // Пустой конструктор обязателен
+    public WarehouseResourceAdapter() {}
 
     @Override
     public void start(BootstrapContext ctx) throws ResourceAdapterInternalException {}
@@ -24,9 +24,8 @@ public class WarehouseResourceAdapter implements ResourceAdapter, Serializable {
     public void endpointDeactivation(MessageEndpointFactory ad, ActivationSpec spec) {}
 
     @Override
-    public javax.transaction.xa.XAResource[] getXAResources(jakarta.resource.spi.ActivationSpec[] specs)
-            throws jakarta.resource.ResourceException {
-        return new javax.transaction.xa.XAResource[0];
+    public XAResource[] getXAResources(ActivationSpec[] specs) throws ResourceException {
+        return new XAResource[0];
     }
 
     @Override
