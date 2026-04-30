@@ -34,14 +34,13 @@ class CreditServiceImpl(
 
     /**
      * Соответствует блоку "Транзакция" на схеме.
-     * Реализует логику: Сохранение -> Запрос в склад -> Откат при ошибке
+     * Сохранение -> Запрос в склад -> Откат при ошибке
      */
     @Transactional(rollbackFor = [Exception::class])
     override fun process(request: CreditApplicationRequest, order: Order): CreditApplication {
         var jiraTicketKey: String? = null
 
         try {
-            // 1. Блок: "Запрос на сохранение нового заказа" (черновик в БД)
             val application = creditApplicationRepository.save(
                 CreditApplication(
                     order = order,
@@ -54,7 +53,7 @@ class CreditServiceImpl(
                 )
             )
 
-            // запрос в склад, возвращаем ключ тикета
+            // возврат ключа тикета
             jiraTicketKey = reserveInWarehouseAndGetKey(application)
 
             // запрос на сохранение новой заявки

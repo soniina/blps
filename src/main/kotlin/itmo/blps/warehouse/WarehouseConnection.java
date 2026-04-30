@@ -51,7 +51,7 @@ public class WarehouseConnection implements Connection {
                 throw new ResourceException("Jira error: " + response.body());
             }
 
-            // Извлекаем ключ из ответа {"id":"1000", "key":"SCRUM-12", ...}
+            // Извлекаем ключ
             String responseBody = response.body();
             String key = responseBody.split("\"key\":\"")[1].split("\"")[0];
 
@@ -72,7 +72,7 @@ public class WarehouseConnection implements Connection {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(jiraUrl + "/rest/api/2/issue/" + issueKey))
                     .header("Authorization", "Basic " + encodedAuth)
-                    .DELETE() // Метод DELETE
+                    .DELETE()
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
