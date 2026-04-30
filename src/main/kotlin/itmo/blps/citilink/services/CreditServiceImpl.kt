@@ -32,53 +32,75 @@ class CreditServiceImpl(
         return application
     }
 
-    @Transactional(rollbackFor = [Exception::class]) // Откатываем БД при ошибке в Jira
-    override fun process(request: CreditApplicationRequest, order: Order): CreditApplication {
-        // 1. Блок: "Запрос на сохранение нового заказа"
-        val application = creditApplicationRepository.save(
-            CreditApplication(
-                order = order,
-                termMonths = request.termMonths,
-                initialPayment = request.initialPayment ?: 0.0,
-                passportSeries = request.passportSeries,
-                passportNumber = request.passportNumber,
-                email = request.email,
-                phone = request.phone
-            )
-        )
-
-        // "Запрос в склад" (Jira JCA)
-        // Если тут упадет исключение (например, Jira 400), Spring сделает ROLLBACK для записи выше
-        reserveInWarehouse(application)
-
-        // "Достаточно ли товара" = ДА
-        application.status = ApplicationStatus.WAITING_FOR_BANKS
-        val finalSavedApp = creditApplicationRepository.save(application)
-
-        // переход к асинхронной части (ActiveMQ)
-        stompCreditRequestSender.sendApplicationId(finalSavedApp.id!!)
-
-        return finalSavedApp
-    }
-
     /**
-     * Блокирующий метод вызова JCA. Бросает исключение при ошибке.
+     * Соответствует блоку "Транзакция" на схеме.
+     * Реализует логику: Сохранение -> Запрос в склад -> Откат при ошибке
      */
-    private fun reserveInWarehouse(app: CreditApplication) {
-        val connection = jiraFactory.connection as WarehouseConnection
+    @Transactional(rollbackFor = [Exception::class])
+    override fun process(request: CreditApplicationRequest, order: Order): CreditApplication {
+        var jiraTicketKey: String? = null
+
         try {
-            println("JCA Warehouse: attempt to reserve the item for order ${app.order.id}")
-            connection.createJiraIssue(
-                "БРОНЬ: Заказ №${app.order.id}",
-                "Новая заявка на кредит №${app.id}. Клиент: ${app.email}. Требуется резерв товара."
+            // 1. Блок: "Запрос на сохранение нового заказа" (черновик в БД)
+            val application = creditApplicationRepository.save(
+                CreditApplication(
+                    order = order,
+                    termMonths = request.termMonths,
+                    initialPayment = request.initialPayment ?: 0.0,
+                    passportSeries = request.passportSeries,
+                    passportNumber = request.passportNumber,
+                    email = request.email,
+                    phone = request.phone
+                )
             )
-            println("JCA Warehouse: successfully booked via JCA connector")
-        } finally {
-            connection.close() // Всегда закрываем соединение
+
+            // запрос в склад, возвращаем ключ тикета
+            jiraTicketKey = reserveInWarehouseAndGetKey(application)
+
+            // запрос на сохранение новой заявки
+            application.status = ApplicationStatus.WAITING_FOR_BANKS
+            val finalSavedApp = creditApplicationRepository.save(application)
+
+            // отправка в activeMQ
+            stompCreditRequestSender.sendApplicationId(finalSavedApp.id!!)
+
+            return finalSavedApp
+
+        } catch (e: Exception) {
+            // если что-то пошло не так, postgres откатится из-за @Transactional, Jira откатываем вручную
+            if (jiraTicketKey != null) {
+                println("ROLLBACK: Deleting Jira issue $jiraTicketKey due to: ${e.message}")
+                deleteWarehouseReservation(jiraTicketKey)
+            }
+
+            // проброс ошибки дальше, чтобы Spring увидел её и завершил Rollback в БД
+            throw e
         }
     }
 
-    // остальные методы используют неблокирующие уведомления
+    private fun reserveInWarehouseAndGetKey(app: CreditApplication): String {
+        val connection = jiraFactory.connection as WarehouseConnection
+        try {
+            println("JCA Warehouse: attempt to reserve for order ${app.order.id}")
+            return connection.createJiraIssue(
+                "Бронь: заказ №${app.order.id}",
+                "Резерв товара для клиента ${app.email}. Заявка №${app.id}"
+            )
+        } finally {
+            connection.close()
+        }
+    }
+
+    private fun deleteWarehouseReservation(key: String) {
+        try {
+            val connection = jiraFactory.connection as WarehouseConnection
+            connection.deleteJiraIssue(key)
+            connection.close()
+        } catch (e: Exception) {
+            println("CRITICAL: Failed to compensate (delete) Jira ticket $key: ${e.message}")
+        }
+    }
+
 
     @Transactional
     override fun approveOfflineSigning(applicationId: Long): CreditApplication {
@@ -103,8 +125,7 @@ class CreditServiceImpl(
         val saved = creditApplicationRepository.save(application)
 
         sendSafeNotification(
-            //"Заявка №${saved.id} подписана",
-            "Нужно приступить к сборке заказа \${order.id}",
+            "Нужно приступить к сборке заказа ${saved.order.id}",
             "Кредит оформлен. Передано в доставку."
         )
     }
@@ -131,9 +152,6 @@ class CreditServiceImpl(
         creditApplicationRepository.save(creditApplication)
     }
 
-    /**
-     * Вспомогательный метод для статусов, где падение Jira не должно прерывать работу
-     */
     private fun sendSafeNotification(summary: String, description: String) {
         try {
             val connection = jiraFactory.connection as WarehouseConnection

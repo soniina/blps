@@ -21,7 +21,7 @@ public class WarehouseConnection implements Connection {
     }
 
 
-    public void createJiraIssue(String summary, String description) throws ResourceException {
+    public String createJiraIssue(String summary, String description) throws ResourceException {
         try {
             String auth = userEmail + ":" + apiToken;
             String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
@@ -42,20 +42,48 @@ public class WarehouseConnection implements Connection {
                     .uri(URI.create(jiraUrl + "/rest/api/2/issue"))
                     .header("Authorization", "Basic " + encodedAuth)
                     .header("Content-Type", "application/json")
-                    .header("Accept", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 400) {
-                throw new ResourceException("Warehouse reservation rejected: " + response.statusCode() + " - " + response.body());
+                throw new ResourceException("Jira error: " + response.body());
             }
 
-            System.out.println("JCA Warehouse: Item successfully reserved in Jira. ID: " + response.body());
+            // Извлекаем ключ из ответа {"id":"1000", "key":"SCRUM-12", ...}
+            String responseBody = response.body();
+            String key = responseBody.split("\"key\":\"")[1].split("\"")[0];
+
+            System.out.println("Jira issue created: " + key);
+            return key;
 
         } catch (Exception e) {
-            throw new ResourceException("Critical warehouse integration error", e);
+            throw new ResourceException("Failed to create Jira issue", e);
+        }
+    }
+
+    public void deleteJiraIssue(String issueKey) throws ResourceException {
+        try {
+            String auth = userEmail + ":" + apiToken;
+            String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(jiraUrl + "/rest/api/2/issue/" + issueKey))
+                    .header("Authorization", "Basic " + encodedAuth)
+                    .DELETE() // Метод DELETE
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() >= 400) {
+                System.out.println("Failed to delete Jira issue: " + response.body());
+            } else {
+                System.out.println("Jira issue " + issueKey + " deleted successfully (Rollback done)");
+            }
+        } catch (Exception e) {
+            throw new ResourceException("Rollback failed", e);
         }
     }
 
