@@ -1,9 +1,9 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.9.24'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.9.24'
-    id 'org.springframework.boot' version '3.3.0'
-    id 'io.spring.dependency-management' version '1.1.5'
-    id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.24'
+    id 'org.jetbrains.kotlin.jvm' version '2.2.21'
+    id 'org.jetbrains.kotlin.plugin.spring' version '2.2.21'
+    id 'org.springframework.boot' version '3.5.11'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '2.2.21'
     id 'war'
 }
 
@@ -34,16 +34,15 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
-    // XML & JSON & Reflect
+    // XML & JSON
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
-    implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
     // Open API
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
     // Messaging
-    implementation 'org.apache.activemq:activemq-stomp:6.1.2'
+    implementation 'org.apache.activemq:activemq-stomp:6.1.7'
 
     // Database
     runtimeOnly 'org.postgresql:postgresql'
@@ -83,30 +82,23 @@ sourceSets {
     }
 }
 
-// собираем JAR со всеми скомпилированными классами
 tasks.register('driverJar', Jar) {
-    // Ждем завершения компиляции обоих языков
     dependsOn 'compileJava', 'compileKotlin'
     archiveFileName = "warehouse-driver.jar"
 
-    // Берем все скомпилированные классы из всех директорий (java и kotlin)
     from sourceSets.main.output
 
-    // Включаем только нужный пакет, чтобы не тащить лишнее из Spring
     include 'itmo/blps/warehouse/**'
 
-    // На всякий случай дублируем стратегию имен
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-// собираем RAR
 tasks.register('buildRar', Zip) {
     dependsOn 'driverJar'
     archiveFileName = "warehouse-ra.rar"
     destinationDirectory = layout.buildDirectory.dir("libs")
     archiveExtension = 'rar'
 
-    // Кладем наш JAR в корень RAR
     from(driverJar.archiveFile)
 
     into('META-INF') {
@@ -115,6 +107,7 @@ tasks.register('buildRar', Zip) {
 }
 
 bootWar {
+    dependsOn 'buildRar'
     archiveFileName = 'ROOT.war'
     rootSpec.exclude('itmo/blps/warehouse/**')
     doLast {
@@ -123,6 +116,7 @@ bootWar {
             def targetPath = "${projectDir}/${name}/standalone/deployments"
             copy {
                 from archiveFile
+                from tasks.buildRar.archiveFile
                 into targetPath
             }
         }

@@ -1,37 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jboss-deployment-structure>
     <deployment>
-        <!-- сначала ищем библиотеки в WAR -->
-        <local-last value="true" />
-
         <exclude-subsystems>
             <subsystem name="logging" />
             <subsystem name="jpa" />
-            <subsystem name="webservices" />
-            <subsystem name="jaxrs" />
         </exclude-subsystems>
-
-        <exclusions>
-            <module name="javaee.api" />
-            <module name="jakarta.persistence.api" />
-            <module name="org.hibernate" />
-            <module name="org.hibernate.validator" />
-            <module name="org.jboss.logging" />
-            <module name="org.slf4j" />
-            <module name="org.slf4j.impl" />
-
-            <module name="com.fasterxml.jackson.core.jackson-annotations" />
-            <module name="com.fasterxml.jackson.core.jackson-core" />
-            <module name="com.fasterxml.jackson.core.jackson-databind" />
-            <module name="com.fasterxml.jackson.dataformat.jackson-dataformat-xml" />
-            <module name="com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider" />
-            <module name="com.fasterxml.jackson.module.jackson-module-jaxb-annotations" />
-            <module name="com.fasterxml.jackson.module.jackson-module-parameter-names" />
-            <module name="com.fasterxml.jackson.datatype.jackson-datatype-jdk8" />
-            <module name="com.fasterxml.jackson.datatype.jackson-datatype-jsr310" />
-
-            <module name="org.jboss.resteasy.resteasy-jackson2-provider" />
-        </exclusions>
 
         <dependencies>
             <module name="deployment.warehouse-ra.rar" export="true"/>

@@ -35,7 +35,7 @@ class AuthController(private val jwtProvider: JwtProvider, private val passwordE
 
     private val xmlFile = File(JaasConfig.USERS_XML_PATH)
 
-    @Operation(summary = "Login", description = "Verifies credentials through JAAS and returns JWT token")
+    @Operation(summary = "Вход в систему", description = "Проверяет учетные данные через JAAS и возвращает JWT токен")
     @PostMapping("/login")
     fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<Any> {
         try {

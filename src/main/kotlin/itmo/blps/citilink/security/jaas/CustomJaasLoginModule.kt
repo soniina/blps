@@ -48,20 +48,18 @@ class CustomJaasLoginModule : LoginModule {
         println("JAAS: user login attempt: $inputUser")
 
         try {
-            val inputUser = (callbacks[0] as NameCallback).name
-            val inputPass = String((callbacks[1] as PasswordCallback).password)
+            val xmlFile = File(JaasConfig.USERS_XML_PATH)
 
-            println("JAAS: login attempt for user: $inputUser")
+            if (!xmlFile.exists()) {
+                println("JAAS: login attempt for user: $inputUser")
+                return false
+            }
 
-            val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream("users.xml")
-                ?: this::class.java.classLoader.getResourceAsStream("users.xml")
-                ?: throw Exception("File users.xml not found in classpath!")
+            val usersList = xmlMapper.readValue(xmlFile, UsersList::class.java)
 
-            val xmlMapper = com.fasterxml.jackson.dataformat.xml.XmlMapper.builder()
-                .addModule(com.fasterxml.jackson.module.kotlin.KotlinModule.Builder().build())
-                .build()
-
-            val usersList = xmlMapper.readValue(inputStream, UsersList::class.java)
+            usersList.users.forEach {
+                println("DEBUG XML: Прочитан юзер [${it.username}], роль [${it.role}]")
+            }
 
             val foundUser = usersList.users.find {
                 val usernameMatch = it.username.trim() == inputUser.trim()
