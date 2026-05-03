@@ -1,8 +1,8 @@
 package itmo.blps.citilink.services
 
 import itmo.blps.citilink.models.CartItem
-import itmo.blps.warehouse.WarehouseConnection
-import itmo.blps.warehouse.WarehouseConnectionFactory
+import itmo.blps.citilink.warehouse.WarehouseConnection
+import itmo.blps.citilink.warehouse.WarehouseConnectionFactory
 import jakarta.annotation.Resource
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service

@@ -51,6 +51,10 @@ dependencies {
     compileOnly 'jakarta.transaction:jakarta.transaction-api:2.0.0'
     compileOnly 'jakarta.platform:jakarta.jakartaee-api:9.1.0'
 
+    // Camunda
+    implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-webapp:7.21.0'
+    implementation 'org.camunda.bpm.springboo:camunda-bpm-spring-boot-starter-rest:7.21.0'
+
     // Server & Test
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

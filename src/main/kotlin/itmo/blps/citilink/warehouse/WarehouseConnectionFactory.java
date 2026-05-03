@@ -1,4 +1,4 @@
-package itmo.blps.warehouse;
+package itmo.blps.citilink.warehouse;
 
 import jakarta.resource.ResourceException;
 import jakarta.resource.cci.*;

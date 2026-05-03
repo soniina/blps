@@ -1,30 +1,28 @@
-package itmo.blps.citilink.services
+package itmo.blps.citilink.delegates
 
 import itmo.blps.citilink.repositories.ProductRepository
+import org.camunda.bpm.engine.delegate.DelegateExecution
 import org.springframework.context.annotation.Profile
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.camunda.bpm.engine.delegate.JavaDelegate
 
 @Profile("shop")
-@Service
-class ProductSchedulerService(private val productRepository: ProductRepository) {
+@Service()
+class ProductSchedulerDelegate(private val productRepository: ProductRepository): JavaDelegate {
 
-    @Scheduled(fixedRate = 300000) // 5 минут
     @Transactional
-    fun updateProductsOfDay() {
-        println("Planner: updating of day's product")
+    override fun execute(execution: DelegateExecution) {
+        println(">>> Camunda BPM: Начинаю обновление товаров дня по таймеру...")
 
-        // снимаем статус "Товар дня" со всех текущих товаров
         val currentProducts = productRepository.findAll()
         currentProducts.forEach { it.isProductOfDay = false }
 
-        // 3 случайных товара из списка
         if (currentProducts.isNotEmpty()) {
             val randomProducts = currentProducts.shuffled().take(3)
             randomProducts.forEach { it.isProductOfDay = true }
             productRepository.saveAll(currentProducts)
-            println("Scheduler: new products of the day have been selected successfully")
+            println(">>> Camunda BPM: Новые товары дня успешно выбраны!")
         }
     }
 }

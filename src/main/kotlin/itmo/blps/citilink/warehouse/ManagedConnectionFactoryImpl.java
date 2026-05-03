@@ -1,8 +1,8 @@
-package itmo.blps.warehouse;
+package itmo.blps.citilink.warehouse;
 
 import jakarta.resource.ResourceException;
 import jakarta.resource.spi.*;
-import jakarta.resource.cci.ConnectionFactory;
+
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Set;

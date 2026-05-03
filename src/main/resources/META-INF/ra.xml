@@ -9,15 +9,15 @@
     <resourceadapter-version>1.0</resourceadapter-version>
 
     <resourceadapter>
-        <resourceadapter-class>itmo.blps.warehouse.WarehouseResourceAdapter</resourceadapter-class>
+        <resourceadapter-class>itmo.blps.citilink.warehouse.WarehouseResourceAdapter</resourceadapter-class>
 
         <outbound-resourceadapter>
             <connection-definition>
-                <managedconnectionfactory-class>itmo.blps.warehouse.ManagedConnectionFactoryImpl</managedconnectionfactory-class>
+                <managedconnectionfactory-class>itmo.blps.citilink.warehouse.ManagedConnectionFactoryImpl</managedconnectionfactory-class>
                 <connectionfactory-interface>jakarta.resource.cci.ConnectionFactory</connectionfactory-interface>
-                <connectionfactory-impl-class>itmo.blps.warehouse.WarehouseConnectionFactory</connectionfactory-impl-class>
+                <connectionfactory-impl-class>itmo.blps.citilink.warehouse.WarehouseConnectionFactory</connectionfactory-impl-class>
                 <connection-interface>jakarta.resource.cci.Connection</connection-interface>
-                <connection-impl-class>itmo.blps.warehouse.WarehouseConnection</connection-impl-class>
+                <connection-impl-class>itmo.blps.citilink.warehouse.WarehouseConnection</connection-impl-class>
 
                 <!-- Свойства должны быть ТУТ, так как они в ManagedConnectionFactoryImpl -->
                 <config-property>
