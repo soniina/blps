@@ -8,10 +8,9 @@ import itmo.blps.citilink.dto.responses.CreditOfferResponse
 import itmo.blps.citilink.dto.responses.toResponse
 import itmo.blps.citilink.services.CreditOfferService
 import itmo.blps.citilink.services.CreditService
-import itmo.blps.citilink.services.OrderService
 import jakarta.validation.Valid
+import org.camunda.bpm.engine.TaskService
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
@@ -21,25 +20,46 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/credit")
 class CreditController(
-    private val creditService: CreditService, private val orderService: OrderService,
+    private val creditService: CreditService,
+    private val taskService: TaskService,
     private val creditOfferService: CreditOfferService
 ) {
 
-    @Operation(summary = "Создать заявку на кредит", description = "Оформляет заявку на основе существующего заказа")
+    @Operation(
+        summary = "Создать заявку на кредит",
+        description = "Передает данные в процесс для создания заявки на основе существующего заказа"
+    )
     @PostMapping("/applications")
     fun processCredit(
         authentication: Authentication,
         @Valid @RequestBody request: CreditApplicationRequest
-    ): ResponseEntity<CreditApplicationResponse> {
+    ): ResponseEntity<String> {
         val username = authentication.name
-        val order = orderService.getOrder(request.orderId, username)
 
-        val application = creditService.process(request, order)
+        val task = taskService.createTaskQuery()
+            .processInstanceBusinessKey(username)
+            .taskDefinitionKey("CreditDetailsTask")
+            .active()
+            .singleResult() ?: return ResponseEntity.badRequest().body("Задача создания кредитной заявки не активна")
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(application.toResponse())
+        val variables = mapOf(
+            "termMonths" to request.termMonths,
+            "initialPayment" to request.initialPayment,
+            "passportSeries" to request.passportSeries,
+            "passportNumber" to request.passportNumber,
+            "email" to request.email,
+            "phone" to request.phone
+        )
+
+        taskService.complete(task.id, variables)
+
+        return ResponseEntity.ok("Данные для кредита приняты. Заявка формируется и отправляется в банки.")
     }
 
-    @Operation(summary = "Получить информацию о заявке", description = "Возвращает текущие данные и статус конкретной кредитной заявки")
+    @Operation(
+        summary = "Получить информацию о заявке",
+        description = "Возвращает текущие данные и статус конкретной кредитной заявки"
+    )
     @GetMapping("/applications/{applicationId}")
     fun getApplication(
         authentication: Authentication,
@@ -51,7 +71,10 @@ class CreditController(
         return ResponseEntity.ok(application.toResponse())
     }
 
-    @Operation(summary = "Список предложений", description = "Возвращает доступные предложения банков по конкретной заявке")
+    @Operation(
+        summary = "Список предложений",
+        description = "Возвращает доступные предложения банков по конкретной заявке"
+    )
     @GetMapping("/applications/{applicationId}/offers")
     fun getOffers(
         authentication: Authentication,

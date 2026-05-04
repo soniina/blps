@@ -8,6 +8,7 @@ import itmo.blps.citilink.dto.responses.toResponse
 import itmo.blps.citilink.services.CartService
 import itmo.blps.citilink.services.OrderService
 import jakarta.validation.Valid
+import org.camunda.bpm.engine.TaskService
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -19,22 +20,36 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/orders")
 class OrderController(
-    private val cartService: CartService,
-    private val orderService: OrderService
+    private val orderService: OrderService,
+    private val taskService: TaskService
 ) {
 
-    @Operation(summary = "Оформить заказ", description = "Преобразует корзину пользователя в оформленный заказ")
+    @Operation(summary = "Оформить заказ", description = "Передает данные заказа в бизнес-процесс")
     @PostMapping
     fun orderProcess(
         authentication: Authentication,
         @Valid @RequestBody request: OrderRequest
-    ): ResponseEntity<OrderResponse> {
+    ): ResponseEntity<String> {
         val username = authentication.name
-        val cart = cartService.getCart(username)
-        val cartItems = cartService.getCartItems(cart)
 
-        val order = orderService.process(request, username, cartItems)
-        return ResponseEntity.status(HttpStatus.CREATED).body(order.toResponse())
+        val task = taskService.createTaskQuery()
+            .processInstanceBusinessKey(username)
+            .taskDefinitionKey("OrderDetailsTask")
+            .active()
+            .singleResult() ?: return ResponseEntity.badRequest().body("Сначала перейдите к оформлению заказа из корзины")
+
+        val variables = mapOf(
+            "name" to request.name,
+            "surname" to request.surname,
+            "phone" to request.phone,
+            "receiptMethod" to request.receiptMethod.name,
+            "deliveryAddress" to request.deliveryAddress,
+            "paymentMethod" to request.paymentMethod.name
+        )
+
+        taskService.complete(task.id, variables)
+
+        return ResponseEntity.ok("Данные заказа приняты. Процесс переходит к созданию заказа.")
     }
 
     @Operation(summary = "Детали заказа", description = "Возвращает информацию о конкретном заказе по ID")

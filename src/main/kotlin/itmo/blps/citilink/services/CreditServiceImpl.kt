@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class CreditServiceImpl(
     private val creditApplicationRepository: CreditApplicationRepository,
-    private val stompCreditRequestSender: StompCreditRequestSender,
     private val warehouseJcaService: WarehouseJcaService
 ) : CreditService {
 
@@ -44,8 +43,6 @@ class CreditServiceImpl(
 
         application.status = ApplicationStatus.WAITING_FOR_BANKS
         creditApplicationRepository.save(application)
-
-        stompCreditRequestSender.sendApplicationId(application.id)
 
         return application
     }

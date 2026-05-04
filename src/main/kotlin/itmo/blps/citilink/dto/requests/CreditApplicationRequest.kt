@@ -4,9 +4,6 @@ import jakarta.validation.constraints.*
 
 data class CreditApplicationRequest(
 
-    @field:Positive
-    val orderId: Long,
-
     @field:NotNull(message = "Введите срок кредита")
     @field:Min(3) @field:Max(36)
     val termMonths: Int,

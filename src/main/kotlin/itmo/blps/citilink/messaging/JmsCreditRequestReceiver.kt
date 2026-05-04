@@ -6,6 +6,8 @@ import jakarta.persistence.EntityNotFoundException
 import org.springframework.context.annotation.Profile
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Component
+import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.postForEntity
 
 @Component
 @Profile("banks")
@@ -21,6 +23,17 @@ class CreditRequestReceiver(
             ?: throw EntityNotFoundException(">>> JMS: CreditApplication with id $applicationId not found")
 
         bankService.generateOffers(application)
+
+        val restTemplate = RestTemplate()
+        val messageBody = mapOf(
+            "messageName" to "OffersGeneratedMessage",
+            "correlationKeys" to mapOf(
+                "applicationId" to mapOf("value" to applicationId.toLong(), "type" to "Long")
+            )
+        )
+
+        restTemplate.postForEntity<String>("http://localhost:8080/engine-rest/message", messageBody)
+
         println(">>> JMS: Application offers №$applicationId successfully generated")
     }
 }
