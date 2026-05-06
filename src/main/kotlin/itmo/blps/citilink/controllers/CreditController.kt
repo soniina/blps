@@ -92,13 +92,18 @@ class CreditController(
     fun selectOffer(
         authentication: Authentication,
         @PathVariable offerId: Long
-    ): ResponseEntity<CreditApplicationResponse> {
+    ): ResponseEntity<String> {
         val username = authentication.name
-        val offer = creditOfferService.getCreditOffer(offerId, username)
 
-        creditService.selectOffer(offer.application, offer)
+        val task = taskService.createTaskQuery()
+            .processInstanceBusinessKey(username)
+            .taskDefinitionKey("SelectOffer_Task")
+            .active()
+            .singleResult() ?: return ResponseEntity.badRequest().body("Задача выбора оффера недоступна")
 
-        return ResponseEntity.ok(offer.application.toResponse())
+        taskService.complete(task.id, mapOf("selectedOfferId" to offerId))
+
+        return ResponseEntity.ok("Оффер выбран. Переходим к подписанию.")
     }
 
     @Operation(summary = "Подписать заявку", description = "Онлайн подписание кредитного договора пользователем")

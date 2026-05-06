@@ -18,7 +18,7 @@ class BankServiceImpl(
 ) : BankService {
 
     @Transactional
-    override fun generateOffers(application: CreditApplication) {
+    override fun generateOffers(application: CreditApplication): Boolean {
         val allBanks = listOf(
             "Сбербанк", "ВТБ", "Альфа-Банк", "Тинькофф", "Газпромбанк", "Райффайзенбанк", "МТС Банк"
         )
@@ -44,5 +44,6 @@ class BankServiceImpl(
             application.status = ApplicationStatus.REJECTED
         }
         creditApplicationRepository.save(application)
+        return approvedOffers.isNotEmpty()
     }
 }

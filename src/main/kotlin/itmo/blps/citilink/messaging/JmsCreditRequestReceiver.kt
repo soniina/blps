@@ -22,16 +22,18 @@ class CreditRequestReceiver(
         val application = creditApplicationRepository.findCreditApplicationsById(applicationId.toLong())
             ?: throw EntityNotFoundException(">>> JMS: CreditApplication with id $applicationId not found")
 
-        bankService.generateOffers(application)
+        val isApproved = bankService.generateOffers(application)
 
         val restTemplate = RestTemplate()
         val messageBody = mapOf(
             "messageName" to "OffersGeneratedMessage",
+            "processVariables" to mapOf(
+                "isApproved" to mapOf("value" to isApproved, "type" to "Boolean")
+            ),
             "correlationKeys" to mapOf(
-                "applicationId" to mapOf("value" to applicationId.toLong(), "type" to "Long")
+                "applicationId" to mapOf("value" to application.id, "type" to "Long")
             )
         )
-
         restTemplate.postForEntity<String>("http://localhost:8080/engine-rest/message", messageBody)
 
         println(">>> JMS: Application offers №$applicationId successfully generated")
