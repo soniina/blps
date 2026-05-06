@@ -6,7 +6,7 @@ import org.camunda.bpm.engine.delegate.DelegateExecution
 import org.camunda.bpm.engine.delegate.JavaDelegate
 import org.springframework.stereotype.Component
 
-@Component("selectOfferDelegate")
+@Component
 class SelectOfferDelegate(
     private val creditService: CreditService,
     private val creditOfferService: CreditOfferService
@@ -17,6 +17,8 @@ class SelectOfferDelegate(
 
         val offer = creditOfferService.getCreditOffer(offerId, username)
         creditService.selectOffer(offer.application, offer)
+
+        execution.setVariable("isOnline", offer.isOnlineSigningAvailable)
 
         println(">>> Camunda: Пользователь $username выбрал оффер №$offerId")
     }

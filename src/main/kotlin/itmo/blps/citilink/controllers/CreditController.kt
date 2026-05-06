@@ -97,7 +97,7 @@ class CreditController(
 
         val task = taskService.createTaskQuery()
             .processInstanceBusinessKey(username)
-            .taskDefinitionKey("SelectOffer_Task")
+            .taskDefinitionKey("SelectOfferTask")
             .active()
             .singleResult() ?: return ResponseEntity.badRequest().body("Задача выбора оффера недоступна")
 
@@ -111,13 +111,17 @@ class CreditController(
     fun signApplication(
         authentication: Authentication,
         @PathVariable applicationId: Long
-    ): ResponseEntity<CreditApplicationResponse> {
+    ): ResponseEntity<String> {
         val username = authentication.name
-        val application = creditService.getCreditApplication(applicationId, username)
 
-        creditService.signApplication(application)
+        val task = taskService.createTaskQuery()
+            .processInstanceBusinessKey(username)
+            .taskDefinitionKey("SignApplicationTask")
+            .active()
+            .singleResult() ?: return ResponseEntity.badRequest().body("Задача подписания сейчас недоступна")
 
-        return ResponseEntity.ok(application.toResponse())
+        taskService.complete(task.id)
+
+        return ResponseEntity.ok("Договор подписан. Спасибо за покупку!")
     }
-
 }
