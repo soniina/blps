@@ -7,7 +7,7 @@ import org.camunda.bpm.engine.delegate.JavaDelegate
 import org.springframework.stereotype.Component
 
 @Component
-class SelectOfferDelegate(
+class OfferSelectionDelegate(
     private val creditService: CreditService,
     private val creditOfferService: CreditOfferService
 ) : JavaDelegate {

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 
 @Profile("shop")
 @Component
-class CreditDelegate(
+class CreditCreationDelegate(
     private val creditService: CreditService,
     private val orderService: OrderService
 ) : JavaDelegate {

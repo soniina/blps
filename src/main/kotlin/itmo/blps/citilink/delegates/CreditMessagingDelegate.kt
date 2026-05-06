@@ -6,7 +6,7 @@ import org.camunda.bpm.engine.delegate.JavaDelegate
 import org.springframework.stereotype.Component
 
 @Component
-class MessagingDelegate(private val stompSender: StompCreditRequestSender) : JavaDelegate {
+class CreditMessagingDelegate(private val stompSender: StompCreditRequestSender) : JavaDelegate {
     override fun execute(execution: DelegateExecution) {
         val applicationId = execution.getVariable("applicationId") as Long
 

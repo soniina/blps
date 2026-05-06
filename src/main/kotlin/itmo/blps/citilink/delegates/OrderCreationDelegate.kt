@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 
 @Profile("shop")
 @Component
-class OrderDelegate(
+class OrderCreationDelegate(
     private val orderService: OrderService,
     private val cartService: CartService
 ) : JavaDelegate {

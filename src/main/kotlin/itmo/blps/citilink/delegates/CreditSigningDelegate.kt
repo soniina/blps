@@ -6,7 +6,7 @@ import org.camunda.bpm.engine.delegate.JavaDelegate
 import org.springframework.stereotype.Component
 
 @Component
-class SignApplicationDelegate(private val creditService: CreditService) : JavaDelegate {
+class CreditSigningDelegate(private val creditService: CreditService) : JavaDelegate {
     override fun execute(execution: DelegateExecution) {
         val applicationId = execution.getVariable("applicationId") as Long
         val username = execution.getVariable("username") as String

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Profile("shop")
 @Component()
-class CartDelegate(
+class CartOperationDelegate(
     private val cartService: CartService,
     private val productService: ProductService
 ) : JavaDelegate {
