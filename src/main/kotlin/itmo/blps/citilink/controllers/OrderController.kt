@@ -31,12 +31,11 @@ class OrderController(
         @Valid @RequestBody request: OrderRequest
     ): ResponseEntity<String> {
         val username = authentication.name
-
         val task = taskService.createTaskQuery()
             .processInstanceBusinessKey(username)
             .taskDefinitionKey("OrderDetailsTask")
             .active()
-            .singleResult() ?: return ResponseEntity.badRequest().body("Сначала перейдите к оформлению заказа из корзины")
+            .singleResult() ?: return ResponseEntity.badRequest().body("Этап OrderDetailsTask недоступен для пользователя $username сейчас")
 
         val variables = mapOf(
             "name" to request.name,

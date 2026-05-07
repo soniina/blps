@@ -20,6 +20,6 @@ class OfferSelectionDelegate(
 
         execution.setVariable("isOnline", offer.isOnlineSigningAvailable)
 
-        println(">>> Camunda: Пользователь $username выбрал оффер №$offerId")
+        println(">>> Camunda: Пользователь $username выбрал кредитное предложение №$offerId")
     }
 }

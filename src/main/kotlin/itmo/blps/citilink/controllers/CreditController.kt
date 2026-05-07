@@ -10,6 +10,7 @@ import itmo.blps.citilink.services.CreditOfferService
 import itmo.blps.citilink.services.CreditService
 import jakarta.validation.Valid
 import org.camunda.bpm.engine.TaskService
+import org.camunda.bpm.engine.task.Task
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
@@ -35,12 +36,7 @@ class CreditController(
         @Valid @RequestBody request: CreditApplicationRequest
     ): ResponseEntity<String> {
         val username = authentication.name
-
-        val task = taskService.createTaskQuery()
-            .processInstanceBusinessKey(username)
-            .taskDefinitionKey("CreditDetailsTask")
-            .active()
-            .singleResult() ?: return ResponseEntity.badRequest().body("Задача создания кредитной заявки не активна")
+        val task = getActiveTask(username, "CreditDetailsTask")
 
         val variables = mapOf(
             "termMonths" to request.termMonths,
@@ -94,12 +90,7 @@ class CreditController(
         @PathVariable offerId: Long
     ): ResponseEntity<String> {
         val username = authentication.name
-
-        val task = taskService.createTaskQuery()
-            .processInstanceBusinessKey(username)
-            .taskDefinitionKey("SelectOfferTask")
-            .active()
-            .singleResult() ?: return ResponseEntity.badRequest().body("Задача выбора оффера недоступна")
+        val task = getActiveTask(username, "CreditSelectionTask")
 
         taskService.complete(task.id, mapOf("selectedOfferId" to offerId))
 
@@ -113,15 +104,19 @@ class CreditController(
         @PathVariable applicationId: Long
     ): ResponseEntity<String> {
         val username = authentication.name
-
-        val task = taskService.createTaskQuery()
-            .processInstanceBusinessKey(username)
-            .taskDefinitionKey("SignApplicationTask")
-            .active()
-            .singleResult() ?: return ResponseEntity.badRequest().body("Задача подписания сейчас недоступна")
+        val task = getActiveTask(username, "CreditSigningTask")
 
         taskService.complete(task.id)
 
         return ResponseEntity.ok("Договор подписан. Спасибо за покупку!")
+    }
+
+    private fun getActiveTask(username: String, taskKey: String): Task {
+        return taskService.createTaskQuery()
+            .processInstanceBusinessKey(username)
+            .taskDefinitionKey(taskKey)
+            .active()
+            .singleResult()
+            ?: throw IllegalStateException("Этап '$taskKey' недоступен для пользователя $username сейчас")
     }
 }

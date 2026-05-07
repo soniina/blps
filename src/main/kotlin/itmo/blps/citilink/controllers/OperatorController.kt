@@ -48,5 +48,4 @@ class OperatorController(
 
         return ResponseEntity.ok("Оффлайн подписание подтверждено.")
     }
-
 }

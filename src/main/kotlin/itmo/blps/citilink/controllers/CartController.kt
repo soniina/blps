@@ -19,18 +19,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/cart")
 class CartController(
     private val cartService: CartService,
-    private val taskService: TaskService,
-    private val runtimeService: RuntimeService
+    private val taskService: TaskService
 ) {
-
-    private fun findTask(username: String, taskDefinitionKey: String): Task {
-        return taskService.createTaskQuery()
-            .processInstanceBusinessKey(username)
-            .taskDefinitionKey(taskDefinitionKey)
-            .active()
-            .singleResult()
-            ?: throw IllegalStateException("Задача $taskDefinitionKey не найдена для пользователя $username. Сначала зайдите на витрину!")
-    }
 
     @Operation(
         summary = "Получить корзину",
@@ -55,8 +45,7 @@ class CartController(
         @RequestParam productId: Long
     ): ResponseEntity<CartResponse> {
         val username = authentication.name
-
-        val task = findTask(username, "BrowsingTask")
+        val task = getActiveTask(username, "BrowsingTask")
 
         taskService.complete(
             task.id, mapOf(
@@ -71,7 +60,8 @@ class CartController(
     @Operation(summary = "Удалить товар", description = "Мы в корзине (CartTask), удаляем позицию и остаемся в ней")
     @DeleteMapping("/items/{itemId}")
     fun removeCartItem(authentication: Authentication, @PathVariable itemId: Long): ResponseEntity<CartResponse> {
-        val task = findTask(authentication.name, "CartTask")
+        val username = authentication.name
+        val task = getActiveTask(username, "CartTask")
 
         taskService.complete(
             task.id, mapOf(
@@ -95,7 +85,8 @@ class CartController(
         @PathVariable itemId: Long,
         @RequestParam quantity: Int
     ): ResponseEntity<CartResponse> {
-        val task = findTask(authentication.name, "CartTask")
+        val username = authentication.name
+        val task = getActiveTask(username, "CartTask")
 
         taskService.complete(
             task.id, mapOf(
@@ -112,7 +103,7 @@ class CartController(
     @PostMapping("/back-to-browsing")
     fun backToBrowsing(authentication: Authentication): ResponseEntity<Unit> {
         val username = authentication.name
-        val task = findTask(username, "CartTask")
+        val task = getActiveTask(username, "CartTask")
 
         taskService.complete(task.id, mapOf("target" to "BACK_TO_SHOPPING"))
 
@@ -122,9 +113,19 @@ class CartController(
     @Operation(summary = "Оформить заказ", description = "Выход из Корзины к Оформлению заказа")
     @PostMapping("/checkout")
     fun checkout(authentication: Authentication): ResponseEntity<String> {
-        val task = findTask(authentication.name, "CartTask")
+        val username = authentication.name
+        val task = getActiveTask(username, "CartTask")
 
         taskService.complete(task.id, mapOf("target" to "GO_TO_ORDER"))
         return ResponseEntity.ok("Переход к оформлению...")
+    }
+
+    private fun getActiveTask(username: String, taskKey: String): Task {
+        return taskService.createTaskQuery()
+            .processInstanceBusinessKey(username)
+            .taskDefinitionKey(taskKey)
+            .active()
+            .singleResult()
+            ?: throw IllegalStateException("Этап '$taskKey' недоступен для пользователя $username сейчас")
     }
 }
