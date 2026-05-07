@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface CreditApplicationRepository : JpaRepository<CreditApplication, Long> {
-    fun findCreditApplicationsById(applicationId: Long): CreditApplication?
+    fun findCreditApplicationById(applicationId: Long): CreditApplication?
     fun findAllByStatus(status: ApplicationStatus): List<CreditApplication>
+    fun findByIdAndStatus(applicationId: Long, status: ApplicationStatus): CreditApplication?
 }

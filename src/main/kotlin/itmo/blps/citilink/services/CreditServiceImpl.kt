@@ -1,7 +1,6 @@
 package itmo.blps.citilink.services
 
 import itmo.blps.citilink.dto.requests.CreditApplicationRequest
-import itmo.blps.citilink.messaging.StompCreditRequestSender
 import itmo.blps.citilink.models.*
 import itmo.blps.citilink.repositories.CreditApplicationRepository
 import jakarta.persistence.EntityNotFoundException
@@ -19,7 +18,7 @@ class CreditServiceImpl(
 
     @Transactional(readOnly = true)
     override fun getCreditApplication(applicationId: Long, username: String): CreditApplication {
-        val application = creditApplicationRepository.findCreditApplicationsById(applicationId)
+        val application = creditApplicationRepository.findCreditApplicationById(applicationId)
             ?: throw EntityNotFoundException("CreditApplication with id $applicationId not found")
 
         if (application.order.username != username) throw AccessDeniedException("You cannot access orders of another user")
@@ -49,8 +48,7 @@ class CreditServiceImpl(
 
     @Transactional
     override fun approveOfflineSigning(applicationId: Long): CreditApplication {
-        val application = creditApplicationRepository.findById(applicationId)
-            .orElseThrow { EntityNotFoundException("CreditApplication with id $applicationId not found") }
+        val application = getApplicationForOperator(applicationId)
 
         application.status = ApplicationStatus.SIGNED
         application.order.status = OrderStatus.PROCESSING
@@ -95,6 +93,11 @@ class CreditServiceImpl(
 
         creditApplicationRepository.save(creditApplication)
     }
+
+    @Transactional(readOnly = true)
+    override fun getApplicationForOperator(applicationId: Long): CreditApplication =
+        creditApplicationRepository.findByIdAndStatus(applicationId, ApplicationStatus.WAITING_FOR_OPERATOR)
+            ?: throw EntityNotFoundException("CreditApplication with id $applicationId waiting for operator not found")
 
     @Transactional(readOnly = true)
     override fun getApplicationsForOperator(): List<CreditApplication> =

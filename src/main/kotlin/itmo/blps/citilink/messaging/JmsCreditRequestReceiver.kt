@@ -19,7 +19,7 @@ class CreditRequestReceiver(
     fun receiveApplication(applicationId: String) {
         println(">>> JMS: A request has been received to generate offers for the application №$applicationId")
 
-        val application = creditApplicationRepository.findCreditApplicationsById(applicationId.toLong())
+        val application = creditApplicationRepository.findCreditApplicationById(applicationId.toLong())
             ?: throw EntityNotFoundException(">>> JMS: CreditApplication with id $applicationId not found")
 
         val isApproved = bankService.generateOffers(application)

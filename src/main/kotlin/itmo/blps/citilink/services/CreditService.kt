@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional
 interface CreditService {
     fun getCreditApplication(applicationId: Long, username: String): CreditApplication
     fun process(request: CreditApplicationRequest, order: Order): CreditApplication
+    fun getApplicationForOperator(applicationId: Long): CreditApplication
     fun getApplicationsForOperator(): List<CreditApplication>
 
     fun approveOfflineSigning(applicationId: Long): CreditApplication
