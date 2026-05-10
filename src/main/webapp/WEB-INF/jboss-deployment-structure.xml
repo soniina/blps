@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jboss-deployment-structure>
     <deployment>
+        <local-last value="true" />
         <exclude-subsystems>
             <subsystem name="logging" />
             <subsystem name="jpa" />
+            <subsystem name="webservices" />
+            <subsystem name="jaxrs" />
+            <subsystem name="weld" />
+            <subsystem name="bean-validation" />
         </exclude-subsystems>
-
+        <exclusions>
+            <module name="javaee.api" />
+            <module name="jakarta.persistence.api" />
+            <module name="org.hibernate" />
+            <module name="org.hibernate.validator" />
+            <module name="com.fasterxml.jackson.core.jackson-annotations" />
+            <module name="com.fasterxml.jackson.core.jackson-core" />
+            <module name="com.fasterxml.jackson.core.jackson-databind" />
+            <module name="com.fasterxml.jackson.dataformat.jackson-dataformat-xml" />
+            <module name="org.jboss.resteasy.resteasy-jackson2-provider" />
+            <module name="javax.xml.bind.api" />
+        </exclusions>
         <dependencies>
             <module name="deployment.warehouse-ra.rar" export="true"/>
         </dependencies>

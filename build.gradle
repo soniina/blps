@@ -54,6 +54,9 @@ dependencies {
     // Camunda
     implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-webapp:7.21.0'
     implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-rest:7.21.0'
+    implementation 'org.camunda.commons:camunda-commons-logging:1.13.0'
+    implementation 'org.camunda.commons:camunda-commons-utils:1.13.0'
+
 
     // Server & Test
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
@@ -92,7 +95,7 @@ tasks.register('driverJar', Jar) {
 
     from sourceSets.main.output
 
-    include 'itmo/blps/warehouse/**'
+    include 'itmo/blps/citilink/warehouse/**'
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
@@ -111,6 +114,7 @@ tasks.register('buildRar', Zip) {
 }
 
 bootWar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     dependsOn 'buildRar'
     archiveFileName = 'ROOT.war'
     rootSpec.exclude('itmo/blps/warehouse/**')
