@@ -3,8 +3,10 @@ package itmo.blps.citilink.delegates
 import itmo.blps.citilink.messaging.StompCreditRequestSender
 import org.camunda.bpm.engine.delegate.DelegateExecution
 import org.camunda.bpm.engine.delegate.JavaDelegate
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
+@Profile("shop")
 @Component
 class CreditMessagingDelegate(private val stompSender: StompCreditRequestSender) : JavaDelegate {
     override fun execute(execution: DelegateExecution) {

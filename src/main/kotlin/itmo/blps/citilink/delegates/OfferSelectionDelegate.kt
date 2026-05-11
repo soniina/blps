@@ -4,8 +4,10 @@ import itmo.blps.citilink.services.CreditOfferService
 import itmo.blps.citilink.services.CreditService
 import org.camunda.bpm.engine.delegate.DelegateExecution
 import org.camunda.bpm.engine.delegate.JavaDelegate
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
+@Profile("shop")
 @Component
 class OfferSelectionDelegate(
     private val creditService: CreditService,

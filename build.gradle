@@ -22,62 +22,59 @@ repositories {
 
 configurations {
     all {
-        // Исключаем Tomcat полностью, чтобы Spring не искал его классы
+        // 1. Полностью вырезаем Tomcat, чтобы Spring Boot не искал его классы в WildFly (Undertow)
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
-        exclude group: 'org.apache.tomcat.embed', module: 'tomcat-embed-core'
-        exclude group: 'org.apache.tomcat.embed', module: 'tomcat-embed-el'
-        exclude group: 'org.apache.tomcat.embed', module: 'tomcat-embed-websocket'
+        exclude group: 'org.apache.tomcat.embed'
 
-        // Исключаем стандартное логгирование для WildFly
+        // 2. Исключаем стандартный логгер Spring, так как WildFly использует JBoss LogManager
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
 
-        // Исключаем resteasy, если он вдруг пролез через другие либы
-        exclude group: 'org.jboss.resteasy', module: 'resteasy-jaxrs'
+        // 3. Исключаем встроенный RESTEasy, чтобы он не конфликтовал с Jersey из Camunda
+        exclude group: 'org.jboss.resteasy'
     }
 }
 
 dependencies {
-    // Web Starter БЕЗ Tomcat (исключен выше глобально)
+    // Основные стартеры
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    // Добавляем Undertow, так как WildFly работает на нем
-    implementation 'org.springframework.boot:spring-boot-starter-undertow'
-    providedRuntime 'org.springframework.boot:spring-boot-starter-undertow'
-
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-activemq'
 
+    // Работа под управлением Undertow (аналог сервера внутри WildFly)
+    implementation 'org.springframework.boot:spring-boot-starter-undertow'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-undertow'
+
+    // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
+    // Jackson & XML
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+
+    // Messaging
     implementation 'org.apache.activemq:activemq-stomp:6.1.7'
     runtimeOnly 'org.postgresql:postgresql'
 
+    // Jakarta EE API (для компиляции)
     compileOnly 'jakarta.resource:jakarta.resource-api:2.1.0'
     compileOnly 'jakarta.transaction:jakarta.transaction-api:2.0.1'
     compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
     providedRuntime 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
-    // Camunda
+    // Camunda 7.21.0
     implementation platform('org.camunda.bpm:camunda-bom:7.21.0')
     implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-webapp'
-    //implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-rest'
+    implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-rest'
 
+    // Критично для Hibernate 6 внутри WildFly
     implementation 'org.jboss.logging:jboss-logging:3.5.3.Final'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-
-    implementation 'org.springframework.boot:spring-boot-starter-jersey'
-
-    providedRuntime 'org.springframework.boot:spring-boot-starter-undertow'
-    // УДАЛИТЕ ЛЮБЫЕ providedRuntime '...tomcat...'
-
 }
 
 kotlin {
@@ -98,6 +95,7 @@ sourceSets {
     }
 }
 
+// Сборка JCA адаптера
 tasks.register('driverJar', Jar) {
     dependsOn 'classes'
     archiveFileName = "warehouse-driver.jar"
@@ -106,6 +104,7 @@ tasks.register('driverJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+// Сборка RAR архива
 tasks.register('buildRar', Zip) {
     dependsOn 'driverJar'
     archiveFileName = "warehouse-ra.rar"
@@ -119,9 +118,12 @@ bootWar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     dependsOn 'buildRar'
     archiveFileName = 'ROOT.war'
+
+    // Вырезаем классы адаптера из WAR (они будут в RAR)
     rootSpec.exclude('itmo/blps/citilink/warehouse/**')
 
-    // ВАЖНО: Удаляем файлы инициализации javax из библиотек
+    // ВАЖНО: Удаляем файлы инициализации javax из всех вложенных библиотек.
+    // Это не дает "Трансформеру" WildFly упасть с ошибкой Duplicate Entry.
     rootSpec.exclude('**/javax.servlet.ServletContainerInitializer')
     rootSpec.exclude('META-INF/services/javax.servlet.ServletContainerInitializer')
 

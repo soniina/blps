@@ -9,12 +9,12 @@
             <subsystem name="weld" />
             <subsystem name="jsf" />
             <subsystem name="webservices" />
+            <subsystem name="bean-validation" /> <!-- ДОБАВЬТЕ ЭТО -->
         </exclude-subsystems>
         <dependencies>
             <module name="deployment.warehouse-ra.rar" export="true"/>
             <module name="java.sql" export="true" />
             <module name="java.naming" export="true" />
-            <!-- Позволяем приложению использовать системные логи -->
             <module name="org.jboss.logging" export="true" />
             <module name="org.jboss.logmanager" export="true" />
             <module name="org.slf4j" export="true" />
