@@ -5,25 +5,19 @@
         <exclude-subsystems>
             <subsystem name="logging" />
             <subsystem name="jpa" />
-            <subsystem name="webservices" />
             <subsystem name="jaxrs" />
             <subsystem name="weld" />
-            <subsystem name="bean-validation" />
+            <subsystem name="jsf" />
+            <subsystem name="webservices" />
         </exclude-subsystems>
-        <exclusions>
-            <module name="javaee.api" />
-            <module name="jakarta.persistence.api" />
-            <module name="org.hibernate" />
-            <module name="org.hibernate.validator" />
-            <module name="com.fasterxml.jackson.core.jackson-annotations" />
-            <module name="com.fasterxml.jackson.core.jackson-core" />
-            <module name="com.fasterxml.jackson.core.jackson-databind" />
-            <module name="com.fasterxml.jackson.dataformat.jackson-dataformat-xml" />
-            <module name="org.jboss.resteasy.resteasy-jackson2-provider" />
-            <module name="javax.xml.bind.api" />
-        </exclusions>
         <dependencies>
             <module name="deployment.warehouse-ra.rar" export="true"/>
+            <module name="java.sql" export="true" />
+            <module name="java.naming" export="true" />
+            <!-- Позволяем приложению использовать системные логи -->
+            <module name="org.jboss.logging" export="true" />
+            <module name="org.jboss.logmanager" export="true" />
+            <module name="org.slf4j" export="true" />
         </dependencies>
     </deployment>
 </jboss-deployment-structure>

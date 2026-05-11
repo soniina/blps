@@ -1,15 +1,14 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '2.2.21'
-    id 'org.jetbrains.kotlin.plugin.spring' version '2.2.21'
-    id 'org.springframework.boot' version '3.5.11'
-    id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.jetbrains.kotlin.plugin.jpa' version '2.2.21'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.24'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.9.24'
+    id 'org.springframework.boot' version '3.3.4'
+    id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.24'
     id 'war'
 }
 
 group = 'itmo.blps'
 version = '0.0.1-SNAPSHOT'
-description = 'citilink'
 
 java {
     toolchain {
@@ -21,54 +20,69 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    all {
+        // Исключаем Tomcat полностью, чтобы Spring не искал его классы
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+        exclude group: 'org.apache.tomcat.embed', module: 'tomcat-embed-core'
+        exclude group: 'org.apache.tomcat.embed', module: 'tomcat-embed-el'
+        exclude group: 'org.apache.tomcat.embed', module: 'tomcat-embed-websocket'
+
+        // Исключаем стандартное логгирование для WildFly
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+
+        // Исключаем resteasy, если он вдруг пролез через другие либы
+        exclude group: 'org.jboss.resteasy', module: 'resteasy-jaxrs'
+    }
+}
+
 dependencies {
-    // Spring Boot Starters
+    // Web Starter БЕЗ Tomcat (исключен выше глобально)
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // Добавляем Undertow, так как WildFly работает на нем
+    implementation 'org.springframework.boot:spring-boot-starter-undertow'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-undertow'
+
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-activemq'
 
-    // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
-    // XML & JSON
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
-
-    // Open API
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
-
-    // Messaging
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
     implementation 'org.apache.activemq:activemq-stomp:6.1.7'
-
-    // Database
     runtimeOnly 'org.postgresql:postgresql'
 
-    compileOnly 'jakarta.resource:jakarta.resource-api:2.0.0'
-    compileOnly 'jakarta.transaction:jakarta.transaction-api:2.0.0'
-    compileOnly 'jakarta.platform:jakarta.jakartaee-api:9.1.0'
+    compileOnly 'jakarta.resource:jakarta.resource-api:2.1.0'
+    compileOnly 'jakarta.transaction:jakarta.transaction-api:2.0.1'
+    compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+    providedRuntime 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
     // Camunda
-    implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-webapp:7.21.0'
-    implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-rest:7.21.0'
-    implementation 'org.camunda.commons:camunda-commons-logging:1.13.0'
-    implementation 'org.camunda.commons:camunda-commons-utils:1.13.0'
+    implementation platform('org.camunda.bpm:camunda-bom:7.21.0')
+    implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-webapp'
+    //implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-rest'
 
+    implementation 'org.jboss.logging:jboss-logging:3.5.3.Final'
 
-    // Server & Test
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+
+    implementation 'org.springframework.boot:spring-boot-starter-jersey'
+
+    providedRuntime 'org.springframework.boot:spring-boot-starter-undertow'
+    // УДАЛИТЕ ЛЮБЫЕ providedRuntime '...tomcat...'
+
 }
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.addAll '-Xjsr305=strict', '-Xannotation-default-target=param-property'
+        freeCompilerArgs.addAll '-Xjsr305=strict'
     }
 }
 
@@ -78,25 +92,17 @@ allOpen {
     annotation 'jakarta.persistence.Embeddable'
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
 sourceSets {
     main {
-        java {
-            srcDirs += 'src/main/kotlin'
-        }
+        java { srcDirs += 'src/main/kotlin' }
     }
 }
 
 tasks.register('driverJar', Jar) {
-    dependsOn 'compileJava', 'compileKotlin'
+    dependsOn 'classes'
     archiveFileName = "warehouse-driver.jar"
-
     from sourceSets.main.output
-
     include 'itmo/blps/citilink/warehouse/**'
-
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
@@ -105,28 +111,26 @@ tasks.register('buildRar', Zip) {
     archiveFileName = "warehouse-ra.rar"
     destinationDirectory = layout.buildDirectory.dir("libs")
     archiveExtension = 'rar'
-
     from(driverJar.archiveFile)
-
-    into('META-INF') {
-        from 'src/main/resources/META-INF/ra.xml'
-    }
+    into('META-INF') { from 'src/main/resources/META-INF/ra.xml' }
 }
 
 bootWar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     dependsOn 'buildRar'
     archiveFileName = 'ROOT.war'
-    rootSpec.exclude('itmo/blps/warehouse/**')
+    rootSpec.exclude('itmo/blps/citilink/warehouse/**')
+
+    // ВАЖНО: Удаляем файлы инициализации javax из библиотек
+    rootSpec.exclude('**/javax.servlet.ServletContainerInitializer')
+    rootSpec.exclude('META-INF/services/javax.servlet.ServletContainerInitializer')
+
     doLast {
-        def folderNames = ['wildfly-shop', 'wildfly-banks']
-        folderNames.each { name ->
-            def targetPath = "${projectDir}/${name}/standalone/deployments"
-            copy {
-                from archiveFile
-                from tasks.buildRar.archiveFile
-                into targetPath
-            }
+        def targetPath = "${projectDir}/wildfly-shop/standalone/deployments"
+        copy {
+            from archiveFile
+            from tasks.buildRar.archiveFile
+            into targetPath
         }
     }
 }

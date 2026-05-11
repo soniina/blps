@@ -5,11 +5,12 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import itmo.blps.citilink.dto.responses.ProductResponse
 import itmo.blps.citilink.dto.responses.toResponse
 import itmo.blps.citilink.services.ProductService
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication
+//import org.apache.tomcat.util.net.openssl.ciphers.Authentication
 import org.camunda.bpm.engine.RuntimeService
 import org.camunda.bpm.engine.TaskService
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
