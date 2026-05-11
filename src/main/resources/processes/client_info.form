@@ -1,0 +1,73 @@
+{
+  "components": [
+    {
+      "label": "Number",
+      "type": "number",
+      "layout": {
+        "row": "Row_14kupxb",
+        "columns": null
+      },
+      "id": "Field_1bj5f98",
+      "key": "number_52uisw"
+    },
+    {
+      "label": "Number",
+      "type": "number",
+      "layout": {
+        "row": "Row_06et6xw",
+        "columns": null
+      },
+      "id": "Field_1b9be3r",
+      "key": "initialPayment"
+    },
+    {
+      "label": "Text field",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_15g65kt",
+        "columns": null
+      },
+      "id": "Field_1c2rkxp",
+      "key": "passportSeries"
+    },
+    {
+      "label": "Text field",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_1skb8vi",
+        "columns": null
+      },
+      "id": "Field_0pd2yp7",
+      "key": "passportNumber"
+    },
+    {
+      "label": "Text field",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_1r5yuyk",
+        "columns": null
+      },
+      "id": "Field_1b0f3nb",
+      "key": "email"
+    },
+    {
+      "label": "Text field",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_198m53v",
+        "columns": null
+      },
+      "id": "Field_083jflu",
+      "key": "phone"
+    }
+  ],
+  "type": "default",
+  "id": "termMonths",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.46.1"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}

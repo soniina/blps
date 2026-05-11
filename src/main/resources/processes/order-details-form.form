@@ -1,0 +1,91 @@
+{
+  "components": [
+    {
+      "label": "Имя",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_16x5g1i",
+        "columns": null
+      },
+      "id": "Field_1kgvutr",
+      "key": "name"
+    },
+    {
+      "label": "Фамилия",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_1x4ubkz",
+        "columns": null
+      },
+      "id": "Field_1hnzeci",
+      "key": "surname"
+    },
+    {
+      "label": "Телефон",
+      "type": "number",
+      "layout": {
+        "row": "Row_0qyy8xz",
+        "columns": null
+      },
+      "id": "Field_1vzccll",
+      "key": "phone"
+    },
+    {
+      "label": "Способ получения",
+      "values": [
+        {
+          "label": "Самовывоз",
+          "value": "PICKUP"
+        },
+        {
+          "label": "Доставка",
+          "value": "DELIVERY"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_08ixect",
+        "columns": null
+      },
+      "id": "Field_1iophkh",
+      "key": "receiptMethod",
+      "defaultValue": "PICKUP",
+      "searchable": false
+    },
+    {
+      "label": "Адрес доставки",
+      "type": "textarea",
+      "layout": {
+        "row": "Row_1y938v3",
+        "columns": null
+      },
+      "id": "Field_0hmov8h",
+      "key": "deliveryAddress"
+    },
+    {
+      "label": "Способ оплаты",
+      "values": [
+        {
+          "label": "В кредит",
+          "value": "CREDIT"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_1mox43y",
+        "columns": null
+      },
+      "id": "Field_08dvuu5",
+      "key": "paymentMethod"
+    }
+  ],
+  "type": "default",
+  "id": "order-details-form",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.46.1"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}
