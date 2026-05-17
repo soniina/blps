@@ -33,50 +33,50 @@ configurations {
         exclude group: 'org.jboss.resteasy'
     }
 }
-
 dependencies {
-    // Основные стартеры
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // 1. Camunda 7.21 (Jakarta-версия для Spring Boot 3)
+    implementation platform('org.camunda.bpm:camunda-bom:7.21.0')
+    implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-webapp'
+    // REST-стартер не добавляем, чтобы избежать конфликта с Jersey/WildFly
+
+    // 2. Spring Boot Starters (с заменой Tomcat на Undertow)
+    implementation ('org.springframework.boot:spring-boot-starter-web') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+    implementation 'org.springframework.boot:spring-boot-starter-undertow'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-undertow'
+
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-activemq'
 
-    // Работа под управлением Undertow (аналог сервера внутри WildFly)
-    implementation 'org.springframework.boot:spring-boot-starter-undertow'
-    providedRuntime 'org.springframework.boot:spring-boot-starter-undertow'
+    // 3. Системные API (предоставляются WildFly)
+    compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+    providedRuntime 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+    compileOnly 'jakarta.resource:jakarta.resource-api:2.1.0'
+    // КРИТИЧНО: Возвращаем jakarta-аннотации для @Priority
+    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
-    // JWT
+    // 4. XML & JSON (ВЕРНУЛ: необходимо для компиляции твоих UserXmlModel и LoginModule)
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+
+    // 5. OpenAPI / Swagger (ВЕРНУЛ: необходимо для контроллеров)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+
+    // 6. Messaging & Security
+    implementation 'org.apache.activemq:activemq-stomp:6.1.7'
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
-    // Jackson & XML
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
-
-    // Messaging
-    implementation 'org.apache.activemq:activemq-stomp:6.1.7'
+    // 7. База данных и логи
     runtimeOnly 'org.postgresql:postgresql'
-
-    // Jakarta EE API (для компиляции)
-    compileOnly 'jakarta.resource:jakarta.resource-api:2.1.0'
-    compileOnly 'jakarta.transaction:jakarta.transaction-api:2.0.1'
-    compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
-    providedRuntime 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-
-    // Camunda 7.21.0
-    implementation platform('org.camunda.bpm:camunda-bom:7.21.0')
-    implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-webapp'
-    implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-rest'
-
-    // Критично для Hibernate 6 внутри WildFly
     implementation 'org.jboss.logging:jboss-logging:3.5.3.Final'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
-
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll '-Xjsr305=strict'
@@ -119,20 +119,16 @@ bootWar {
     dependsOn 'buildRar'
     archiveFileName = 'ROOT.war'
 
-    // Вырезаем классы адаптера из WAR (они будут в RAR)
+    // Исключаем код адаптера из WAR (он в RAR)
     rootSpec.exclude('itmo/blps/citilink/warehouse/**')
 
-    // ВАЖНО: Удаляем файлы инициализации javax из всех вложенных библиотек.
-    // Это не дает "Трансформеру" WildFly упасть с ошибкой Duplicate Entry.
-    rootSpec.exclude('**/javax.servlet.ServletContainerInitializer')
-    rootSpec.exclude('META-INF/services/javax.servlet.ServletContainerInitializer')
+    // Полностью исключаем проблемные файлы из camunda-engine
+    rootSpec.exclude('**/META-INF/services/javax.servlet.ServletContainerInitializer')
+    rootSpec.exclude('**/META-INF/services/jakarta.servlet.ServletContainerInitializer')
 
-    doLast {
-        def targetPath = "${projectDir}/wildfly-shop/standalone/deployments"
-        copy {
-            from archiveFile
-            from tasks.buildRar.archiveFile
-            into targetPath
-        }
-    }
+    // Дополнительно: исключаем все service файлы, которые могут конфликтовать
+    rootSpec.exclude('**/META-INF/services/*')
+
+    // Исключаем jboss-deployment-structure из вложенных JAR
+    rootSpec.exclude('**/META-INF/jboss-deployment-structure.xml')
 }

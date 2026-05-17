@@ -31,14 +31,21 @@ class SecurityConfig(private val jwtFilter: JwtFilter) {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
-            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) }
             .authorizeHttpRequests { auth ->
+                // 1. Разрешаем пути Camunda (статику, API и интерфейс)
+                auth.requestMatchers("/camunda/**").permitAll()
+                auth.requestMatchers("/api/**").permitAll()
+                auth.requestMatchers("/lib/**").permitAll()
+
+                // 2. Стандартные публичные пути
                 auth.requestMatchers("/").permitAll()
                 auth.requestMatchers("/v3/**").permitAll()
                 auth.requestMatchers("/swagger-ui/**").permitAll()
                 auth.requestMatchers("/auth/**").permitAll()
                 auth.requestMatchers("/products/**").permitAll()
 
+                // 3. Ролевая модель
                 auth.requestMatchers("/operator/**").hasAuthority("OPERATOR")
 
                 auth.requestMatchers("/cart/**").hasAuthority("AUTHORIZED")
@@ -52,5 +59,4 @@ class SecurityConfig(private val jwtFilter: JwtFilter) {
 
         return http.build()
     }
-
 }

@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" 
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" 
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
-                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn" 
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI" 
-                  id="Definitions_1" 
-                  targetNamespace="http://bpmn.io/schema/bpmn" 
-                  exporter="Camunda Modeler" 
-                  exporterVersion="5.21.0">
+<bpmn:definitions
+    xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+    xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+    xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+    xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+    xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    id="Definitions_1"
+    targetNamespace="http://bpmn.io/schema/bpmn"
+    exporter="Camunda Modeler"
+    exporterVersion="5.46.1">
   <bpmn:collaboration id="Collaboration_00llgyx">
     <bpmn:participant id="Participant_15t1ii1" name="Планировщик" processRef="Process_1balg1z" />
     <bpmn:participant id="Participant_0j1re6q" name="Магазин" processRef="ShopProcess" />
@@ -81,7 +82,7 @@
     <bpmn:startEvent id="Event_14zct3v" name="Вход в магазин">
       <bpmn:outgoing>Flow_11ww1ux</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="UpdateCartService" name="Обновить БД корзины" camunda:delegateExpression="${cartDelegate}">
+    <bpmn:serviceTask id="UpdateCartService" name="Обновить БД корзины" camunda:delegateExpression="${cartOperationDelegate}">
       <bpmn:incoming>Flow_1ok98es</bpmn:incoming>
       <bpmn:incoming>Flow_0td5xm4</bpmn:incoming>
       <bpmn:outgoing>Flow_0neunxg</bpmn:outgoing>
@@ -94,19 +95,21 @@
       <bpmn:incoming>Flow_0neunxg</bpmn:incoming>
       <bpmn:outgoing>Flow_1a058d8</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:serviceTask id="CreateOrderService" name="Создание заказа в БД" camunda:delegateExpression="${orderCreationDelegate}">
+    <bpmn:serviceTask id="CreateOrderService" name="Создание заказа в БД" camunda:asyncBefore="true" camunda:delegateExpression="${orderCreationDelegate}">
       <bpmn:incoming>Flow_04g86z1</bpmn:incoming>
       <bpmn:outgoing>Flow_0o2uqjb</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:userTask id="CreditDetailsTask" name="Ввод данных для кредита">
+    <bpmn:userTask id="CreditDetailsTask" name="Ввод данных для кредита" 
+               camunda:formRef="termMonths" 
+               camunda:formRefBinding="latest">
       <bpmn:incoming>Flow_0o2uqjb</bpmn:incoming>
       <bpmn:outgoing>Flow_0a6szhs</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:serviceTask id="CreateCreditApplicationService" name="Обработка заявки" camunda:delegateExpression="${creditDelegate}">
+    <bpmn:serviceTask id="CreateCreditApplicationService" name="Обработка заявки" camunda:delegateExpression="${creditCreationDelegate}">
       <bpmn:incoming>Flow_0a6szhs</bpmn:incoming>
       <bpmn:outgoing>Flow_1wttiw7</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sendTask id="SendToBanksService" name="Отправка в банки" camunda:delegateExpression="${messagingDelegate}">
+    <bpmn:sendTask id="SendToBanksService" name="Отправка в банки" camunda:delegateExpression="${creditMessagingDelegate}">
       <bpmn:incoming>Flow_1wttiw7</bpmn:incoming>
       <bpmn:outgoing>Flow_14npyb1</bpmn:outgoing>
     </bpmn:sendTask>
@@ -127,7 +130,7 @@
       <bpmn:incoming>Flow_02u5qms</bpmn:incoming>
       <bpmn:outgoing>Flow_0g2wr7f</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:serviceTask id="SaveSelectedOfferService" name="Сохранить выбор" camunda:delegateExpression="${selectOfferDelegate}">
+    <bpmn:serviceTask id="SaveSelectedOfferService" name="Сохранить выбор" camunda:delegateExpression="${offerSelectionDelegate}">
       <bpmn:incoming>Flow_0g2wr7f</bpmn:incoming>
       <bpmn:outgoing>Flow_06ho6j5</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -148,7 +151,7 @@
       <bpmn:incoming>Flow_1cn1t1n</bpmn:incoming>
       <bpmn:outgoing>Flow_0wvx963</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="FinalizeSigningService" name="Фиксация онлайн" camunda:delegateExpression="${signApplicationDelegate}">
+    <bpmn:serviceTask id="FinalizeSigningService" name="Фиксация онлайн" camunda:delegateExpression="${creditSigningDelegate}">
       <bpmn:incoming>Flow_16js0ep</bpmn:incoming>
       <bpmn:outgoing>Flow_1jklwxd</bpmn:outgoing>
     </bpmn:serviceTask>
