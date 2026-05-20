@@ -10,11 +10,21 @@ import javax.security.auth.login.Configuration as JaasConfiguration
 class JaasConfig {
 
     companion object {
-        val USERS_XML_PATH = System.getProperty("user.home") + File.separator + "users.xml"
+        // Динамически определяем путь
+        val USERS_XML_PATH: String by lazy {
+            // Пытаемся взять папку данных WildFly (standalone/data)
+            // Если её нет, берем текущую папку запуска приложения
+            val baseDir = System.getProperty("jboss.server.data.dir") ?: "."
+            val path = baseDir + File.separator + "users.xml"
+            path
+        }
     }
 
     @PostConstruct
     fun init() {
+        val absolutePath = File(USERS_XML_PATH).absolutePath
+        println(">>> JAAS: attempt to use user's file here: $absolutePath")
+
         val customConfig = object : JaasConfiguration() {
             override fun getAppConfigurationEntry(name: String): Array<AppConfigurationEntry>? {
                 if (name == "CitilinkLogin") {

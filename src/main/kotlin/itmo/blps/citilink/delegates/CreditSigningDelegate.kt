@@ -16,6 +16,6 @@ class CreditSigningDelegate(private val creditService: CreditService) : JavaDele
         val application = creditService.getCreditApplication(applicationId, username)
         creditService.signApplication(application)
 
-        println(">>> Camunda: Заявка №$applicationId успешно подписана онлайн")
+        println(">>> Camunda: Order №$applicationId signed online successful")
     }
 }

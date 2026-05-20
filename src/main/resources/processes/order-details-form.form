@@ -22,7 +22,7 @@
     },
     {
       "label": "Телефон",
-      "type": "number",
+      "type": "textfield",
       "layout": {
         "row": "Row_0qyy8xz",
         "columns": null

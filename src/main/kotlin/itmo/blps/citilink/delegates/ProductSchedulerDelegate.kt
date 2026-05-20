@@ -13,7 +13,7 @@ class ProductSchedulerDelegate(private val productRepository: ProductRepository)
 
     @Transactional
     override fun execute(execution: DelegateExecution) {
-        println(">>> Camunda: Начинаю обновление товаров дня по таймеру...")
+        println(">>> Camunda: Started updating day's products by timer...")
 
         val currentProducts = productRepository.findAll()
         currentProducts.forEach { it.isProductOfDay = false }
@@ -22,7 +22,7 @@ class ProductSchedulerDelegate(private val productRepository: ProductRepository)
             val randomProducts = currentProducts.shuffled().take(3)
             randomProducts.forEach { it.isProductOfDay = true }
             productRepository.saveAll(currentProducts)
-            println(">>> Camunda: Новые товары дня успешно выбраны!")
+            println(">>> Camunda: New day's products selected!")
         }
     }
 }

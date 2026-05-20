@@ -22,24 +22,28 @@ repositories {
 
 configurations {
     all {
-        // 1. Полностью вырезаем Tomcat, чтобы Spring Boot не искал его классы в WildFly (Undertow)
+        // 1. Полностью вырезаем Tomcat для WildFly (Undertow)
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
         exclude group: 'org.apache.tomcat.embed'
 
-        // 2. Исключаем стандартный логгер Spring, так как WildFly использует JBoss LogManager
+        // 2. Исключаем стандартный логгер Spring и commons-logging
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        exclude group: 'commons-logging', module: 'commons-logging'
 
-        // 3. Исключаем встроенный RESTEasy, чтобы он не конфликтовал с Jersey из Camunda
+        // 3. Исключаем встроенный RESTEasy
         exclude group: 'org.jboss.resteasy'
+
+        // 4. Исключаем snakeyaml (WildFly предоставляет свою версию)
+        exclude group: 'org.yaml', module: 'snakeyaml'
     }
 }
+
 dependencies {
-    // 1. Camunda 7.21 (Jakarta-версия для Spring Boot 3)
+    // 1. Camunda 7.21 (Jakarta для Spring Boot 3)
     implementation platform('org.camunda.bpm:camunda-bom:7.21.0')
     implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-webapp'
-    // REST-стартер не добавляем, чтобы избежать конфликта с Jersey/WildFly
 
-    // 2. Spring Boot Starters (с заменой Tomcat на Undertow)
+    // 2. Spring Boot Starters
     implementation ('org.springframework.boot:spring-boot-starter-web') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
     }
@@ -55,14 +59,13 @@ dependencies {
     compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
     providedRuntime 'jakarta.servlet:jakarta.servlet-api:6.0.0'
     compileOnly 'jakarta.resource:jakarta.resource-api:2.1.0'
-    // КРИТИЧНО: Возвращаем jakarta-аннотации для @Priority
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
-    // 4. XML & JSON (ВЕРНУЛ: необходимо для компиляции твоих UserXmlModel и LoginModule)
+    // 4. XML & JSON
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
 
-    // 5. OpenAPI / Swagger (ВЕРНУЛ: необходимо для контроллеров)
+    // 5. OpenAPI / Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 
     // 6. Messaging & Security
@@ -77,6 +80,7 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
+
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll '-Xjsr305=strict'
@@ -93,6 +97,11 @@ sourceSets {
     main {
         java { srcDirs += 'src/main/kotlin' }
     }
+}
+
+// ИСПРАВЛЕНИЕ ОШИБКИ ДУБЛИКАТОВ
+tasks.named('processResources') {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 // Сборка JCA адаптера
@@ -119,16 +128,14 @@ bootWar {
     dependsOn 'buildRar'
     archiveFileName = 'ROOT.war'
 
-    // Исключаем код адаптера из WAR (он в RAR)
+    // Исключаем код адаптера из WAR (он уходит в RAR)
     rootSpec.exclude('itmo/blps/citilink/warehouse/**')
 
-    // Полностью исключаем проблемные файлы из camunda-engine
+    // Исключаем только те файлы инициализации, которые WildFly предоставляет сам
+    // Мы НЕ исключаем все файлы из META-INF/services, чтобы не сломать Spring Boot
     rootSpec.exclude('**/META-INF/services/javax.servlet.ServletContainerInitializer')
     rootSpec.exclude('**/META-INF/services/jakarta.servlet.ServletContainerInitializer')
 
-    // Дополнительно: исключаем все service файлы, которые могут конфликтовать
-    rootSpec.exclude('**/META-INF/services/*')
-
-    // Исключаем jboss-deployment-structure из вложенных JAR
+    // Исключаем jboss-deployment-structure из вложенных JAR библиотек
     rootSpec.exclude('**/META-INF/jboss-deployment-structure.xml')
 }

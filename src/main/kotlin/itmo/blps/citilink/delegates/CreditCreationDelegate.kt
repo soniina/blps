@@ -20,12 +20,13 @@ class CreditCreationDelegate(
         val orderId = execution.getVariable("orderId") as Long
 
         val request = CreditApplicationRequest(
-            termMonths = execution.getVariable("termMonths") as Int,
-            initialPayment = execution.getVariable("initialPayment") as Double,
-            passportSeries = execution.getVariable("passportSeries") as String,
-            passportNumber = execution.getVariable("passportNumber") as String,
-            email = execution.getVariable("email") as String,
-            phone = execution.getVariable("phone") as String
+            termMonths = execution.getVariable("termMonths")?.toString()?.toInt() ?: 0,
+            initialPayment = execution.getVariable("initialPayment")?.toString()?.toDouble() ?: 0.0,
+
+            passportSeries = execution.getVariable("passportSeries")?.toString() ?: "",
+            passportNumber = execution.getVariable("passportNumber")?.toString() ?: "",
+            email = execution.getVariable("email")?.toString() ?: "",
+            phone = execution.getVariable("phone")?.toString() ?: ""
         )
 
         val order = orderService.getOrder(orderId, username)
@@ -34,6 +35,6 @@ class CreditCreationDelegate(
 
         execution.setVariable("applicationId", application.id)
 
-        println(">>> Camunda: Заявка №${application.id} создана")
+        println(">>> Camunda: Credit order №${application.id} created")
     }
 }

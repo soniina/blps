@@ -14,6 +14,6 @@ class CreditOfflineSigningDelegate(private val creditService: CreditService) : J
 
         creditService.approveOfflineSigning(applicationId)
 
-        println(">>> Camunda: Оператор подтвердил подпись для заявки №$applicationId")
+        println(">>> Camunda: Operator approved signing for order №$applicationId")
     }
 }

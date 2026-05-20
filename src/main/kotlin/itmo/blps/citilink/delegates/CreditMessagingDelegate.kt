@@ -14,6 +14,6 @@ class CreditMessagingDelegate(private val stompSender: StompCreditRequestSender)
 
         stompSender.sendApplicationId(applicationId)
 
-        println(">>> Camunda: Заявка №$applicationId отправлена в банки")
+        println(">>> Camunda: Order №$applicationId sent to banks")
     }
 }

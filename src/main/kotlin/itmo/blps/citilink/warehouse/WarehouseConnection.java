@@ -24,34 +24,34 @@ public class WarehouseConnection implements Connection {
     public String createJiraIssue(String summary, String description) throws ResourceException {
         try {
             String auth = userEmail + ":" + apiToken;
-            String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+            String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            String safeSummary = summary.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ");
+            String safeDescription = description.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
 
-            String jsonBody = String.format("""
-                {
-                  "fields": {
-                    "project": { "key": "SCRUM" },
-                    "summary": "%s",
-                    "description": "%s",
-                    "issuetype": { "name": "Task" }
-                  }
-                }
-                """, summary, description);
+            String jsonBody = "{" +
+                    "\"fields\": {" +
+                    "\"project\": {\"key\": \"SCRUM\"}," +
+                    "\"summary\": \"" + safeSummary + "\"," +
+                    "\"description\": \"" + safeDescription + "\"," +
+                    "\"issuetype\": {\"name\": \"Task\"}" +
+                    "}" +
+                    "}";
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(jiraUrl + "/rest/api/2/issue"))
                     .header("Authorization", "Basic " + encodedAuth)
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .header("Content-Type", "application/json; charset=utf-8") // Указываем кодировку в заголовке
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody, java.nio.charset.StandardCharsets.UTF_8)) // И здесь!
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 400) {
+                System.err.println("Sent JSON: " + jsonBody);
                 throw new ResourceException("Jira error: " + response.body());
             }
 
-            // Извлекаем ключ
             String responseBody = response.body();
             String key = responseBody.split("\"key\":\"")[1].split("\"")[0];
 

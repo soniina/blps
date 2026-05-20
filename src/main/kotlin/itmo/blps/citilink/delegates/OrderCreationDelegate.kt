@@ -35,6 +35,6 @@ class OrderCreationDelegate(
         val order = orderService.process(request, username, cartItems)
 
         execution.setVariable("orderId", order.id)
-        println(">>> Camunda: Заказ №${order.id} создана")
+        println(">>> Camunda: Order №${order.id} created")
     }
 }

@@ -1,17 +1,17 @@
 {
   "components": [
     {
-      "label": "Number",
+      "label": "Срок кредита",
       "type": "number",
       "layout": {
         "row": "Row_14kupxb",
         "columns": null
       },
       "id": "Field_1bj5f98",
-      "key": "number_52uisw"
+      "key": "termMonths"
     },
     {
-      "label": "Number",
+      "label": "Первоначальный взнос",
       "type": "number",
       "layout": {
         "row": "Row_06et6xw",
@@ -21,7 +21,7 @@
       "key": "initialPayment"
     },
     {
-      "label": "Text field",
+      "label": "Серия паспорта",
       "type": "textfield",
       "layout": {
         "row": "Row_15g65kt",
@@ -31,7 +31,7 @@
       "key": "passportSeries"
     },
     {
-      "label": "Text field",
+      "label": "Номер паспорта",
       "type": "textfield",
       "layout": {
         "row": "Row_1skb8vi",
@@ -41,7 +41,7 @@
       "key": "passportNumber"
     },
     {
-      "label": "Text field",
+      "label": "Email",
       "type": "textfield",
       "layout": {
         "row": "Row_1r5yuyk",
@@ -51,7 +51,7 @@
       "key": "email"
     },
     {
-      "label": "Text field",
+      "label": "Телефон",
       "type": "textfield",
       "layout": {
         "row": "Row_198m53v",
