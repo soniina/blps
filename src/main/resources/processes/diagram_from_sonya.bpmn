@@ -113,7 +113,7 @@
       <bpmn:incoming>Flow_1wttiw7</bpmn:incoming>
       <bpmn:outgoing>Flow_14npyb1</bpmn:outgoing>
     </bpmn:sendTask>
-    <bpmn:intermediateCatchEvent id="OffersGeneratedMessage" name="Ожидание офферов">
+    <bpmn:intermediateCatchEvent id="OffersGeneratedMessage" name="Ожидание офферов" camunda:asyncBefore="true">
       <bpmn:incoming>Flow_14npyb1</bpmn:incoming>
       <bpmn:outgoing>Flow_0vvybx6</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_08xddau" messageRef="Message_offers" />

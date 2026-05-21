@@ -1,6 +1,7 @@
 package itmo.blps.citilink.configs
 
 import itmo.blps.citilink.security.jwt.JwtFilter
+import jakarta.servlet.DispatcherType
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -18,13 +19,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig(private val jwtFilter: JwtFilter) {
 
     @Bean
-    fun passwordEncoder(): PasswordEncoder {
-        return BCryptPasswordEncoder()
-    }
+    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     @Bean
-    fun userDetailsService(): UserDetailsService {
-        return InMemoryUserDetailsManager()
+    fun userDetailsService(): UserDetailsService = InMemoryUserDetailsManager()
+
+    // НОВОЕ: Игнорируем путь REST API полностью
+    @Bean
+    fun webSecurityCustomizer(): org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer {
+        return org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer { web ->
+            web.ignoring().requestMatchers("/engine-rest/**")
+        }
     }
 
     @Bean
@@ -33,25 +38,13 @@ class SecurityConfig(private val jwtFilter: JwtFilter) {
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) }
             .authorizeHttpRequests { auth ->
-                // 1. Разрешаем пути Camunda (статику, API и интерфейс)
-                auth.requestMatchers("/camunda/**").permitAll()
-                auth.requestMatchers("/api/**").permitAll()
-                auth.requestMatchers("/lib/**").permitAll()
+                auth.dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
 
-                // 2. Стандартные публичные пути
-                auth.requestMatchers("/").permitAll()
-                auth.requestMatchers("/v3/**").permitAll()
-                auth.requestMatchers("/swagger-ui/**").permitAll()
-                auth.requestMatchers("/auth/**").permitAll()
-                auth.requestMatchers("/products/**").permitAll()
+                auth.requestMatchers("/camunda/**", "/api/**", "/lib/**").permitAll()
 
-                // 3. Ролевая модель
+                auth.requestMatchers("/", "/v3/**", "/swagger-ui/**", "/auth/**", "/products/**").permitAll()
                 auth.requestMatchers("/operator/**").hasAuthority("OPERATOR")
-
-                auth.requestMatchers("/cart/**").hasAuthority("AUTHORIZED")
-                auth.requestMatchers("/checkout/**").hasAuthority("AUTHORIZED")
-                auth.requestMatchers("/orders/**").hasAuthority("AUTHORIZED")
-                auth.requestMatchers("/credit/**").hasAuthority("AUTHORIZED")
+                auth.requestMatchers("/cart/**", "/checkout/**", "/orders/**", "/credit/**").hasAuthority("AUTHORIZED")
 
                 auth.anyRequest().authenticated()
             }

@@ -18,23 +18,33 @@ class OrderCreationDelegate(
 ) : JavaDelegate {
 
     override fun execute(execution: DelegateExecution) {
-        val username = execution.getVariable("username") as String
+        try {
+            val username = execution.getVariable("username") as? String
+                ?: throw IllegalArgumentException("Variable 'username' is missing!")
 
-        val request = OrderRequest(
-            name = execution.getVariable("name") as String,
-            surname = execution.getVariable("surname") as String,
-            phone = execution.getVariable("phone") as String,
-            receiptMethod = ReceiptMethod.valueOf(execution.getVariable("receiptMethod") as String),
-            deliveryAddress = execution.getVariable("deliveryAddress") as? String,
-            paymentMethod = PaymentMethod.valueOf(execution.getVariable("paymentMethod") as String)
-        )
+            val request = OrderRequest(
+                name = execution.getVariable("name")?.toString() ?: "",
+                surname = execution.getVariable("surname")?.toString() ?: "",
+                phone = execution.getVariable("phone")?.toString() ?: "",
+                receiptMethod = ReceiptMethod.valueOf(execution.getVariable("receiptMethod")?.toString() ?: "PICKUP"),
+                deliveryAddress = execution.getVariable("deliveryAddress")?.toString(),
+                paymentMethod = PaymentMethod.valueOf(execution.getVariable("paymentMethod")?.toString() ?: "CREDIT")
+            )
 
-        val cart = cartService.getCart(username)
-        val cartItems = cartService.getCartItems(cart)
+            println(">>> Camunda: Creating order for user $username...")
 
-        val order = orderService.process(request, username, cartItems)
+            val cart = cartService.getCart(username)
+            val cartItems = cartService.getCartItems(cart)
 
-        execution.setVariable("orderId", order.id)
-        println(">>> Camunda: Order №${order.id} created")
+            val order = orderService.process(request, username, cartItems)
+
+            execution.setVariable("orderId", order.id)
+            println(">>> Camunda: Order №${order.id} created successfully")
+
+        } catch (e: Exception) {
+            println("!!! CRITICAL ERROR IN OrderCreationDelegate: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
     }
 }

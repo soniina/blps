@@ -33,6 +33,8 @@ class CreditCreationDelegate(
 
         val application = creditService.process(request, order)
 
+        //execution.setVariable("applicationId", application.id)
+        execution.setProcessBusinessKey(application.id.toString())
         execution.setVariable("applicationId", application.id)
 
         println(">>> Camunda: Credit order №${application.id} created")

@@ -42,6 +42,7 @@ dependencies {
     // 1. Camunda 7.21 (Jakarta для Spring Boot 3)
     implementation platform('org.camunda.bpm:camunda-bom:7.21.0')
     implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-webapp'
+    implementation 'org.camunda.bpm.springboot:camunda-bpm-spring-boot-starter-rest'
 
     // 2. Spring Boot Starters
     implementation ('org.springframework.boot:spring-boot-starter-web') {
