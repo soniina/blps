@@ -1,0 +1,34 @@
+{
+  "components": [
+    {
+      "label": "Подписание договора",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_1mdlqe2",
+        "columns": null
+      },
+      "id": "Field_1b6ikdr",
+      "key": "textfield_rl192",
+      "description": "Нажимая кнопку, вы соглашаетесь с условиями кредитования"
+    },
+    {
+      "label": "Я согласен с условиями и подписываю договор",
+      "type": "checkbox",
+      "layout": {
+        "row": "Row_15ip6wy",
+        "columns": null
+      },
+      "id": "Field_1xs9fv0",
+      "key": "isSigned"
+    }
+  ],
+  "type": "default",
+  "id": "signing-form",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.46.1"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.24.0",
+  "schemaVersion": 19
+}
