@@ -42,7 +42,7 @@ class OrderCreationDelegate(
             println(">>> Camunda: Order №${order.id} created successfully")
 
         } catch (e: Exception) {
-            println("!!! CRITICAL ERROR IN OrderCreationDelegate: ${e.message}")
+            println("!!! ERROR IN OrderCreationDelegate: ${e.message}")
             e.printStackTrace()
             throw e
         }

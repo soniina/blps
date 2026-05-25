@@ -19,10 +19,21 @@ class CartOperationDelegate(
         val username = execution.getVariable("username") as String
 
         when (action) {
+//            "ADD" -> {
+//                val productId = execution.getVariable("productId") as Long
+//                val product = productService.getProductById(productId)
+//                cartService.addCartItem(product, username)
+//            }
             "ADD" -> {
-                val productId = execution.getVariable("productId") as Long
+                val productId = execution.getVariable("productId").toString().toLong()
                 val product = productService.getProductById(productId)
+                // проверка, чтобы не добавить в корзину товар, который не относится к товарам дня
+                if (!product.isProductOfDay) {
+                    throw IllegalArgumentException("Ошибка: Товар '${product.name}' не является товаром дня!")
+                }
+
                 cartService.addCartItem(product, username)
+                println(">>> Camunda: Product ${product.name} added to cart")
             }
             "UPDATE" -> {
                 val itemId = execution.getVariable("itemId") as Long

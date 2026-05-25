@@ -9,7 +9,10 @@
       },
       "id": "Field_1b6ikdr",
       "key": "textfield_rl192",
-      "description": "Нажимая кнопку, вы соглашаетесь с условиями кредитования"
+      "description": "Нажимая кнопку, вы соглашаетесь с условиями кредитования",
+      "validate": {
+        "required": true
+      }
     },
     {
       "label": "Я согласен с условиями и подписываю договор",
@@ -19,7 +22,10 @@
         "columns": null
       },
       "id": "Field_1xs9fv0",
-      "key": "isSigned"
+      "key": "isSigned",
+      "validate": {
+        "required": true
+      }
     }
   ],
   "type": "default",
