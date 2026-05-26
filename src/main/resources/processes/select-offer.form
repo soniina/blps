@@ -10,6 +10,27 @@
       "id": "Field_01s6t79",
       "key": "selectedOfferId",
       "valuesKey": "availableOffers"
+    },
+    {
+      "type": "table",
+      "layout": {
+        "row": "Row_0xyu4a8",
+        "columns": null
+      },
+      "label": "Table",
+      "rowCount": 10,
+      "columns": [
+        {
+          "label": "Доступные условия кредитования",
+          "key": "label"
+        },
+        {
+          "label": "Онлайн-подписание",
+          "key": "onlineAvailable"
+        }
+      ],
+      "id": "Field_0fif095",
+      "dataSource": "=availableOffers"
     }
   ],
   "type": "default",

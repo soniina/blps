@@ -37,10 +37,10 @@ class FetchOffersDelegate(
         println(">>> FetchOffersDelegate [RESULT]: Found ${offers.size} offers in Database")
 
         val offerOptions = offers.map { offer ->
-            val onlineStatus = if (offer.isOnlineSigningAvailable) "Online signing available" else "Offline signing only"
             mapOf(
-                "label" to "${offer.bankName} (Rate: ${offer.interestRate}%) — $onlineStatus",
-                "value" to offer.id.toString()
+                "label" to "${offer.bankName} (Ставка: ${offer.interestRate}%)",
+                "value" to offer.id.toString(),
+                "onlineAvailable" to if (offer.isOnlineSigningAvailable) "Возможно онлайн подписание" else "Только очное подписание договора"
             )
         }
         val jsonString = objectMapper.writeValueAsString(offerOptions)
