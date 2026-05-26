@@ -54,6 +54,7 @@
         <bpmn:flowNodeRef>Gateway_1brjtmj</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>FinalizeOfflineService</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>FinalizeSigningService</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>select-offer-form</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:userTask id="BrowsingTask" name="Просмотр товаров дня">
@@ -112,8 +113,8 @@
     <bpmn:endEvent id="Event_0zcpjxt">
       <bpmn:incoming>Flow_1gpooli</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:userTask id="Activity_068i7lh" name="Выбрать предложение">
-      <bpmn:incoming>Flow_02u5qms</bpmn:incoming>
+    <bpmn:userTask id="Activity_068i7lh" name="Выбрать предложение" camunda:formRef="select-offer-form" camunda:formRefBinding="latest">
+      <bpmn:incoming>Flow_0jr96n0</bpmn:incoming>
       <bpmn:outgoing>Flow_0g2wr7f</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:serviceTask id="SaveSelectedOfferService" name="Сохранить выбор" camunda:delegateExpression="${offerSelectionDelegate}">
@@ -167,7 +168,7 @@
     <bpmn:sequenceFlow id="Flow_1gpooli" name="Нет" sourceRef="Gateway_14mv9h0" targetRef="Event_0zcpjxt">
       <bpmn:conditionExpression>${isApproved == false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_02u5qms" name="Да" sourceRef="Gateway_14mv9h0" targetRef="Activity_068i7lh">
+    <bpmn:sequenceFlow id="Flow_02u5qms" name="Да" sourceRef="Gateway_14mv9h0" targetRef="select-offer-form">
       <bpmn:conditionExpression>${isApproved == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0g2wr7f" sourceRef="Activity_068i7lh" targetRef="SaveSelectedOfferService" />
@@ -182,6 +183,11 @@
     <bpmn:sequenceFlow id="Flow_1eh9alw" name="Нет" sourceRef="Gateway_1brjtmj" targetRef="OperatorSigningTask">
       <bpmn:conditionExpression>${isOnline == false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="select-offer-form" name="Загрузка предложений" camunda:asyncBefore="true" camunda:exclusive="false" camunda:delegateExpression="${fetchOffersDelegate}">
+      <bpmn:incoming>Flow_02u5qms</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jr96n0</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0jr96n0" sourceRef="select-offer-form" targetRef="Activity_068i7lh" />
   </bpmn:process>
   <bpmn:message id="Message_offers" name="OffersGeneratedMessage" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -253,6 +259,9 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_14mv9h0_di" bpmnElement="Gateway_14mv9h0" isMarkerVisible="true">
         <dc:Bounds x="1750" y="765" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1746" y="741" width="58" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0zcpjxt_di" bpmnElement="Event_0zcpjxt">
         <dc:Bounds x="1757" y="882" width="36" height="36" />
@@ -280,6 +289,10 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1u3qvsx_di" bpmnElement="SignApplicationTask">
         <dc:Bounds x="2500" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0e712g3_di" bpmnElement="select-offer-form">
+        <dc:Bounds x="1880" y="750" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_11ww1ux_di" bpmnElement="Flow_11ww1ux">
         <di:waypoint x="286" y="490" />
@@ -350,9 +363,11 @@
         <di:waypoint x="1775" y="882" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_02u5qms_di" bpmnElement="Flow_02u5qms">
-        <di:waypoint x="1775" y="765" />
-        <di:waypoint x="1775" y="490" />
-        <di:waypoint x="1900" y="490" />
+        <di:waypoint x="1800" y="790" />
+        <di:waypoint x="1880" y="790" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1834" y="798" width="14" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0g2wr7f_di" bpmnElement="Flow_0g2wr7f">
         <di:waypoint x="2000" y="490" />
@@ -392,6 +407,12 @@
         <di:waypoint x="2675" y="790" />
         <di:waypoint x="2675" y="490" />
         <di:waypoint x="2800" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jr96n0_di" bpmnElement="Flow_0jr96n0">
+        <di:waypoint x="1930" y="750" />
+        <di:waypoint x="1930" y="640" />
+        <di:waypoint x="1950" y="640" />
+        <di:waypoint x="1950" y="530" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

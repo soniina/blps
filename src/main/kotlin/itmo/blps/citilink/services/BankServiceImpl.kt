@@ -4,6 +4,7 @@ import itmo.blps.citilink.models.ApplicationStatus
 import itmo.blps.citilink.models.CreditApplication
 import itmo.blps.citilink.models.CreditOffer
 import itmo.blps.citilink.repositories.CreditApplicationRepository
+import jakarta.persistence.EntityNotFoundException
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,6 +17,13 @@ class BankServiceImpl(
     private val creditOfferService: CreditOfferService,
     private val creditApplicationRepository: CreditApplicationRepository
 ) : BankService {
+    @Transactional
+    override fun generateOffersById(applicationId: Long): Boolean {
+        val application = creditApplicationRepository.findById(applicationId).orElseThrow {
+            EntityNotFoundException("Application with id $applicationId not found in Banks database")
+        }
+        return generateOffers(application)
+    }
 
     @Transactional
     override fun generateOffers(application: CreditApplication): Boolean {
